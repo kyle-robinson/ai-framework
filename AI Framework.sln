@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30523.141
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AI Framework", "AI Framework\AI Framework.vcxproj", "{EA744FDE-6588-4AA7-94BA-318D00E409DC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Profile|x64 = Profile|x64
+		Profile|x86 = Profile|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EA744FDE-6588-4AA7-94BA-318D00E409DC}.Debug|x64.ActiveCfg = Debug|x64
+		{EA744FDE-6588-4AA7-94BA-318D00E409DC}.Debug|x64.Build.0 = Debug|x64
+		{EA744FDE-6588-4AA7-94BA-318D00E409DC}.Debug|x86.ActiveCfg = Debug|Win32
+		{EA744FDE-6588-4AA7-94BA-318D00E409DC}.Debug|x86.Build.0 = Debug|Win32
+		{EA744FDE-6588-4AA7-94BA-318D00E409DC}.Profile|x64.ActiveCfg = Profile|x64
+		{EA744FDE-6588-4AA7-94BA-318D00E409DC}.Profile|x64.Build.0 = Profile|x64
+		{EA744FDE-6588-4AA7-94BA-318D00E409DC}.Profile|x86.ActiveCfg = Profile|Win32
+		{EA744FDE-6588-4AA7-94BA-318D00E409DC}.Profile|x86.Build.0 = Profile|Win32
+		{EA744FDE-6588-4AA7-94BA-318D00E409DC}.Release|x64.ActiveCfg = Release|x64
+		{EA744FDE-6588-4AA7-94BA-318D00E409DC}.Release|x64.Build.0 = Release|x64
+		{EA744FDE-6588-4AA7-94BA-318D00E409DC}.Release|x86.ActiveCfg = Release|Win32
+		{EA744FDE-6588-4AA7-94BA-318D00E409DC}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6DE670EE-1A69-4E02-A158-AF8B1B4FF7D0}
+	EndGlobalSection
+EndGlobal
