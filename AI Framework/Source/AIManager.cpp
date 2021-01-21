@@ -5,6 +5,7 @@
 #include "Waypoint.h"
 
 #include "main.h"
+#include <sstream>
 
 
 HRESULT AIManager::initialise(ID3D11Device* pd3dDevice)
@@ -80,11 +81,24 @@ void AIManager::keyPress(WPARAM param)
         }
         case VK_NUMPAD1:
         {
-            OutputDebugStringA("1 pressed \n");
+            // Vector2D Distance Calculation
+            Vector2D vec1 = { 1.0f, 2.0f };
+            Vector2D vec2 = { 7.0f, 4.0f };
+            double distance = vec1.Distance( vec2 );
+            wstringstream oss;
+            oss << "Distance Between Vectors (" << vec1.x << ',' << vec1.y << ") + (" << vec2.x << ',' << vec2.y << ") = " << distance;
+            MessageBox( nullptr, oss.str().c_str(), L"Vectord2D Distance", MB_OK );
             break;
         }
         case VK_NUMPAD2:
         {
+            // Vector2D Addition
+            Vector2D vec1 = { 1.0f, 2.0f };
+            Vector2D vec2 = { 7.0f, 4.0f };
+            Vector2D vec3 = vec1 + vec2;
+            wstringstream oss;
+            oss << '(' << vec1.x << ',' << vec1.y << ") + (" << vec2.x << ',' << vec2.y << ") = (" << vec3.x << ',' << vec3.y << ')';
+            MessageBox( nullptr, oss.str().c_str(), L"Vector2D Addition", MB_OK );
             break;
         }
         // etc

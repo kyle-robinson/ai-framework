@@ -2,7 +2,7 @@
 #include "DrawableGameObject.h"
 #include "Vector2D.h"
 
-//#define 
+#define MAX_SPEED 300
 
 class Vehicle : public DrawableGameObject
 {
