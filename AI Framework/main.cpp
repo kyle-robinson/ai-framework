@@ -552,7 +552,7 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam 
         xPos -= SCREEN_WIDTH / 2;
         yPos -= SCREEN_HEIGHT / 2;
         yPos *= -1;
-        g_AIManager.mouseUp(xPos, yPos);
+        g_AIManager.mouseUp( xPos, yPos );
 
 		break;
 	}

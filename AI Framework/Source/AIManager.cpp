@@ -58,10 +58,14 @@ HRESULT AIManager::initialise(ID3D11Device* pd3dDevice)
     float yPos = 0;
 
     m_pCar = new Vehicle();
-    hr = m_pCar->initMesh(pd3dDevice);
+    hr = m_pCar->initMesh(pd3dDevice, L"Resources\\Textures\\car_blue.dds");
     m_pCar->setPosition(XMFLOAT3(xPos, yPos, 0));
-    if (FAILED(hr))
-        return hr;
+    if ( FAILED( hr ) ) return hr;
+
+    m_pCar2 = new Vehicle();
+    hr = m_pCar2->initMesh( pd3dDevice, L"Resources\\Textures\\car_red.dds" );
+    m_pCar2->setPosition( XMFLOAT3( 250, -250, 0 ) );
+    if ( FAILED( hr ) ) return hr;
 
     // create the waypoints
     float xGap = SCREEN_WIDTH / WAYPOINT_RESOLUTION;
@@ -95,10 +99,7 @@ void AIManager::update(const float fDeltaTime)
 
     std::vector<Waypoint*> neighbours = GetNeighbours( 19, 10 );
     for ( unsigned int i = 0; i < neighbours.size(); i++ )
-    {
-        neighbours[i]->update( fDeltaTime );
         AddItemToDrawList( neighbours[i] );
-    }
 
     // pickups
     for (unsigned int i = 0; i < m_pickups.size(); i++) {
@@ -106,15 +107,19 @@ void AIManager::update(const float fDeltaTime)
         AddItemToDrawList(m_pickups[i]);
     }
 
-    // car
-    m_pCar->update(fDeltaTime);
-    checkForCollisions();
-    AddItemToDrawList(m_pCar);
+    // cars
+    m_pCar->update( fDeltaTime );
+    checkForCollisions( m_pCar );
+    AddItemToDrawList( m_pCar );
+
+    m_pCar2->update( fDeltaTime );
+    checkForCollisions( m_pCar2 );
+    AddItemToDrawList( m_pCar2 );
 }
 
-void AIManager::mouseUp(int x, int y)
+void AIManager::mouseUp( int x, int y )
 {
-    m_pCar->setPositionTo(Vector2D(x, y));
+    m_pCar->setPositionTo( Vector2D( x, y ) );
 }
 
 void AIManager::keyPress(WPARAM param)
@@ -154,7 +159,7 @@ void AIManager::keyPress(WPARAM param)
     }
 }
 
-bool AIManager::checkForCollisions()
+bool AIManager::checkForCollisions( Vehicle* car )
 {
     if (m_pickups.size() == 0)
         return false;
@@ -168,7 +173,7 @@ bool AIManager::checkForCollisions()
         &carScale,
         &dummy,
         &carPos,
-        XMLoadFloat4x4(m_pCar->getTransform())
+        XMLoadFloat4x4( car->getTransform() )
     );
 
     XMFLOAT3 scale;

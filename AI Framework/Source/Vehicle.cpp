@@ -1,10 +1,10 @@
 #include "Vehicle.h"
 
 
-HRESULT	Vehicle::initMesh(ID3D11Device* pd3dDevice)
+HRESULT	Vehicle::initMesh(ID3D11Device* pd3dDevice, const std::wstring& texturePath)
 {
 	m_scale = XMFLOAT3(30, 20, 1);
-	setTextureName(L"Resources\\Textures\\car_blue.dds");
+	setTextureName(texturePath);
 
 	HRESULT hr = DrawableGameObject::initMesh(pd3dDevice);
 

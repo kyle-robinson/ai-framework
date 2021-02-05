@@ -7,7 +7,7 @@
 class Vehicle : public DrawableGameObject
 {
 public:
-	virtual HRESULT initMesh(ID3D11Device* pd3dDevice);
+	virtual HRESULT initMesh(ID3D11Device* pd3dDevice, const std::wstring& texturePath);
 	virtual void update(const float deltaTime);
 
 	void setMaxSpeed(const float maxSpeed) { m_maxSpeed = maxSpeed; }
