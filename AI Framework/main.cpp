@@ -12,7 +12,7 @@
 #include "Vehicle.h"
 #include "PickupItem.h"
 #include "AIManager.h"
-
+#include "ErrorLogger.h"
 
 
 //#define PICK_MODE // Ignore this, it is not needed, but might be useful for debugging
@@ -599,8 +599,9 @@ void DrawItem(DrawableGameObject* object)
 
 void AddItemToDrawList(DrawableGameObject* object)
 {
-    if ( object != nullptr )
-        g_GameObjects.push_back(object);
+    if ( object == nullptr )
+        ErrorLogger::Log( std::string( "Object (" ) + typeid( object ).name() + ") was nullptr when trying to draw!" );
+    g_GameObjects.push_back(object);
 }
 
 void Update(const float deltaTime)

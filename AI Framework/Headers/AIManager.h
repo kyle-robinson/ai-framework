@@ -21,6 +21,8 @@ class AIManager
 {
 public:
 	Waypoint* GetWaypoint( const int x, const int y );
+	std::vector<Waypoint*> GetNeighbours( const int x, const int y );
+
 	HRESULT initialise(ID3D11Device* pd3dDevice);
 	void	update(const float fDeltaTime);
 	void	mouseUp(int x, int y);

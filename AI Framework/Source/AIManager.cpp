@@ -22,6 +22,28 @@ Waypoint* AIManager::GetWaypoint( const int x, const int y )
     return m_waypoints.at( y * WAYPOINT_RESOLUTION + x );
 }
 
+std::vector<Waypoint*> AIManager::GetNeighbours( const int x, const int y )
+{
+    std::vector<Waypoint*> neighbours;
+    int waypointIndex = y * WAYPOINT_RESOLUTION + x;
+
+    for ( int i = x - 1; i <= x + 1; i++ )
+    {
+        for ( int j = y - 1; j <= y + 1; j++ )
+        {
+            int neighbourIndex = j * WAYPOINT_RESOLUTION + i;
+            if ( waypointIndex != neighbourIndex )
+            {
+                if ( !m_waypoints[neighbourIndex] )
+                    continue;
+                neighbours.push_back( m_waypoints[neighbourIndex] );
+            }
+        }
+    }
+
+    return neighbours;
+}
+
 HRESULT AIManager::initialise(ID3D11Device* pd3dDevice)
 {
     // create a pickup item ----------------------------------------------
@@ -62,25 +84,31 @@ HRESULT AIManager::initialise(ID3D11Device* pd3dDevice)
 
 void AIManager::update(const float fDeltaTime)
 {
+    // waypoints
     for (unsigned int i = 0; i < m_waypoints.size(); i++) {
         m_waypoints[i]->update(fDeltaTime);
         //AddItemToDrawList(m_waypoints[i]); // if you comment this in, it will display the waypoints
     }
 
-    AddItemToDrawList( GetWaypoint( 19, 1 ) );
-    AddItemToDrawList( GetWaypoint( 17, 1 ) );
-    AddItemToDrawList( GetWaypoint( 12, 1 ) );
+    AddItemToDrawList( GetWaypoint( 9, 1 ) );
     AddItemToDrawList( GetWaypoint( 5, 1 ) );
 
+    std::vector<Waypoint*> neighbours = GetNeighbours( 19, 10 );
+    for ( unsigned int i = 0; i < neighbours.size(); i++ )
+    {
+        neighbours[i]->update( fDeltaTime );
+        AddItemToDrawList( neighbours[i] );
+    }
+
+    // pickups
     for (unsigned int i = 0; i < m_pickups.size(); i++) {
         m_pickups[i]->update(fDeltaTime);
         AddItemToDrawList(m_pickups[i]);
     }
 
+    // car
     m_pCar->update(fDeltaTime);
-
     checkForCollisions();
-
     AddItemToDrawList(m_pCar);
 }
 
