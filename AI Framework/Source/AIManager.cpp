@@ -7,6 +7,10 @@
 #include "main.h"
 #include <sstream>
 
+Waypoint* AIManager::GetWaypoint( const int x, const int y )
+{
+    return m_waypoints.at( y * WAYPOINT_RESOLUTION + x );
+}
 
 HRESULT AIManager::initialise(ID3D11Device* pd3dDevice)
 {
@@ -53,6 +57,8 @@ void AIManager::update(const float fDeltaTime)
         //AddItemToDrawList(m_waypoints[i]); // if you comment this in, it will display the waypoints
     }
 
+    AddItemToDrawList( GetWaypoint( 5, 1 ) );
+
     for (unsigned int i = 0; i < m_pickups.size(); i++) {
         m_pickups[i]->update(fDeltaTime);
         AddItemToDrawList(m_pickups[i]);
@@ -87,7 +93,7 @@ void AIManager::keyPress(WPARAM param)
             double distance = vec1.Distance( vec2 );
             wstringstream oss;
             oss << "Distance Between Vectors (" << vec1.x << ',' << vec1.y << ") + (" << vec2.x << ',' << vec2.y << ") = " << distance;
-            MessageBox( nullptr, oss.str().c_str(), L"Vectord2D Distance", MB_OK );
+            MessageBox( nullptr, oss.str().c_str(), L"Vector2D Distance", MB_OK );
             break;
         }
         case VK_NUMPAD2:
@@ -154,6 +160,3 @@ bool AIManager::checkForCollisions()
 
     return false;
 }
-
-
-

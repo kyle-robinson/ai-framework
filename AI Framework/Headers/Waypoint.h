@@ -15,4 +15,3 @@ private:
     bool m_isCheckpoint;
     bool m_visible;
 };
-
