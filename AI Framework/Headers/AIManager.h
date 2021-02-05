@@ -18,6 +18,8 @@ typedef vector<DrawableGameObject*> vecDrawables;
 typedef vector<Waypoint*> vecWaypoints;
 typedef vector<PickupItem*> vecPickups;
 
+enum Deceleration { slow = 3, normal = 2, fast = 1 };
+
 class AIManager
 {
 public:
@@ -31,8 +33,11 @@ public:
 	void	keyPress(WPARAM param);
 
 protected:
+	void	checkWallWrapping( Vehicle* car );
 	bool	checkForCollisions( Vehicle* car );
+	void Wander( Vehicle* car );
 	Vector2D Flee( Vector2D TargetPos );
+	Vector2D Arrive( Vector2D TargetPos, Deceleration deceleration );
 
 private:
 	UINT width;

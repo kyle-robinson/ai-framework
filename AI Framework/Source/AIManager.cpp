@@ -66,7 +66,7 @@ HRESULT AIManager::initialise(ID3D11Device* pd3dDevice, UINT width, UINT height)
 
     m_pCar2 = new Vehicle();
     hr = m_pCar2->initMesh( pd3dDevice, L"Resources\\Textures\\car_red.dds" );
-    m_pCar2->setPosition( XMFLOAT3( 250, -250, 0 ) );
+    m_pCar2->setPositionTo( XMFLOAT3( width / 2, 0.0f, 0 ) );
     if ( FAILED( hr ) ) return hr;
 
     // create the waypoints
@@ -110,11 +110,15 @@ void AIManager::update(const float fDeltaTime)
     }
 
     // cars
+    checkWallWrapping( m_pCar );
     m_pCar->update( fDeltaTime );
     checkForCollisions( m_pCar );
     AddItemToDrawList( m_pCar );
 
+
+    //checkWallWrapping( m_pCar2 );
     m_pCar2->update( fDeltaTime );
+    Wander( m_pCar2 );
     checkForCollisions( m_pCar2 );
     AddItemToDrawList( m_pCar2 );
 }
@@ -172,9 +176,31 @@ void AIManager::keyPress(WPARAM param)
             m_pCar->setPositionTo( Flee( *m_pCar2->getPosition() ) );
             break;
         }
+        case VK_NUMPAD5:
+        {
+            // arrive at the red car
+            m_pCar->setPositionTo( Arrive( *m_pCar2->getPosition(), slow ) );
+            break;
+        }
         default:
             break;
     }
+}
+
+void AIManager::checkWallWrapping( Vehicle* car )
+{
+    int offset = 10.0f;
+    int xBound = width / 2;
+    if ( car->getPosition()->x > xBound - offset )
+        car->setPosition( XMFLOAT3( -xBound, car->getPosition()->y, car->getPosition()->z ) );
+    else if ( car->getPosition()->x < -xBound + offset )
+        car->setPosition( XMFLOAT3( xBound, car->getPosition()->y, car->getPosition()->z ) );
+
+    int yBound = height / 2;
+    if ( car->getPosition()->y < -yBound + offset )
+        car->setPosition( XMFLOAT3( car->getPosition()->x, yBound, car->getPosition()->z ) );
+    else if ( car->getPosition()->y > yBound - offset )
+        car->setPosition( XMFLOAT3( car->getPosition()->x, -yBound, car->getPosition()->z ) );
 }
 
 bool AIManager::checkForCollisions( Vehicle* car )
@@ -226,8 +252,39 @@ bool AIManager::checkForCollisions( Vehicle* car )
 
 Vector2D AIManager::Flee( Vector2D TargetPos )
 {
-    const float max_distance = ( width / 2 ) + height;
+    const float max_distance = 400.0f;
     Vector2D distToTarget( *m_pCar->getPosition() - TargetPos );
     Vector2D DesiredVelocity = Vec2DNormalize( distToTarget ) * max_distance;
     return ( DesiredVelocity - *m_pCar->getDirection() );
+}
+
+Vector2D AIManager::Arrive( Vector2D TargetPos, Deceleration deceleration )
+{
+    Vector2D ToTarget = TargetPos - *m_pCar->getPosition();
+    double dist = ToTarget.Length();
+
+    if ( dist > 0 )
+    {
+        const double DecelerationTweaker = 0.3;
+        double speed = dist / ( static_cast<double>( deceleration ) * DecelerationTweaker );
+        speed = min( speed, m_pCar->getMaxSpeed() );
+
+        Vector2D DesiredVelocity = ToTarget * speed / dist;
+        return DesiredVelocity;
+    }
+
+    return Vector2D( 0, 0 );
+}
+
+void AIManager::Wander( Vehicle* car )
+{
+    int xBound = width / 2;
+    if ( car->getPosition()->x >= xBound )
+    {
+        car->setPositionTo( XMFLOAT3( -xBound, car->getPosition()->y, car->getPosition()->z ) );
+    }
+    else if ( car->getPosition()->x <= -xBound )
+    {
+        car->setPositionTo( XMFLOAT3( xBound, car->getPosition()->y, car->getPosition()->z ) );
+    }
 }
