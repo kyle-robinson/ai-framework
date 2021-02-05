@@ -409,7 +409,7 @@ HRESULT InitDevice()
     }
 
     // initialise the AI / SceneManager
-    g_AIManager.initialise(g_pd3dDevice);
+    g_AIManager.initialise(g_pd3dDevice, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     return S_OK;
 }

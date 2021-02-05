@@ -7,6 +7,7 @@
 #include <vector>
 
 using namespace std;
+struct Vector2D;
 
 class Vehicle;
 class DrawableGameObject;
@@ -23,7 +24,7 @@ public:
 	Waypoint* GetWaypoint( const int x, const int y );
 	std::vector<Waypoint*> GetNeighbours( const int x, const int y );
 
-	HRESULT initialise(ID3D11Device* pd3dDevice);
+	HRESULT initialise(ID3D11Device* pd3dDevice, UINT width, UINT height);
 	void	update(const float fDeltaTime);
 	void	LeftMouseUp( const int x, int y );
 	void	RightMouseUp( const int x, int y );
@@ -31,8 +32,12 @@ public:
 
 protected:
 	bool	checkForCollisions( Vehicle* car );
+	Vector2D Flee( Vector2D TargetPos );
 
 private:
+	UINT width;
+	UINT height;
+
 	vecWaypoints            m_waypoints;
 	vecPickups              m_pickups;
 	Vehicle*				m_pCar = nullptr;

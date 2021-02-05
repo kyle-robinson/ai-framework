@@ -44,10 +44,12 @@ std::vector<Waypoint*> AIManager::GetNeighbours( const int x, const int y )
     return neighbours;
 }
 
-HRESULT AIManager::initialise(ID3D11Device* pd3dDevice)
+HRESULT AIManager::initialise(ID3D11Device* pd3dDevice, UINT width, UINT height)
 {
+    this->width = width;
+    this->height = height;
+    
     // create a pickup item ----------------------------------------------
-
     PickupItem* pPickup = new PickupItem();
     HRESULT hr = pPickup->initMesh(pd3dDevice);
     m_pickups.push_back(pPickup);
@@ -158,7 +160,18 @@ void AIManager::keyPress(WPARAM param)
             MessageBox( nullptr, oss.str().c_str(), L"Vector2D Addition", MB_OK );
             break;
         }
-        // etc
+        case VK_NUMPAD3:
+        {
+            // seek the red car
+            m_pCar->setPositionTo( *m_pCar2->getPosition() );
+            break;
+        }
+        case VK_NUMPAD4:
+        {
+            // flee the red car
+            m_pCar->setPositionTo( Flee( *m_pCar2->getPosition() ) );
+            break;
+        }
         default:
             break;
     }
@@ -202,7 +215,6 @@ bool AIManager::checkForCollisions( Vehicle* car )
     XMStoreFloat3(&boundingSpherePU.Center, puPos);
     boundingSpherePU.Radius = scale.x;
 
-    // test
     if (boundingSphereCar.Intersects(boundingSpherePU))
     {
         OutputDebugStringA("Collision!\n");
@@ -210,4 +222,12 @@ bool AIManager::checkForCollisions( Vehicle* car )
     }
 
     return false;
+}
+
+Vector2D AIManager::Flee( Vector2D TargetPos )
+{
+    const float max_distance = ( width / 2 ) + height;
+    Vector2D distToTarget( *m_pCar->getPosition() - TargetPos );
+    Vector2D DesiredVelocity = Vec2DNormalize( distToTarget ) * max_distance;
+    return ( DesiredVelocity - *m_pCar->getDirection() );
 }
