@@ -25,7 +25,8 @@ public:
 
 	HRESULT initialise(ID3D11Device* pd3dDevice);
 	void	update(const float fDeltaTime);
-	void	mouseUp(int x, int y);
+	void	LeftMouseUp( const int x, int y );
+	void	RightMouseUp( const int x, int y );
 	void	keyPress(WPARAM param);
 
 protected:

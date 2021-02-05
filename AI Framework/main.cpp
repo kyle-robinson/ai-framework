@@ -540,8 +540,9 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam 
 
     switch( message )
     {
-	case WM_LBUTTONUP:
-	{
+    case WM_LBUTTONUP:
+    case WM_RBUTTONUP:
+    {
         int xPos = GET_X_LPARAM(lParam);
         int yPos = GET_Y_LPARAM(lParam);
 #ifdef PICK_MODE
@@ -552,10 +553,18 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam 
         xPos -= SCREEN_WIDTH / 2;
         yPos -= SCREEN_HEIGHT / 2;
         yPos *= -1;
-        g_AIManager.mouseUp( xPos, yPos );
-
-		break;
-	}
+	    if ( message == WM_LBUTTONUP )
+	    {
+            g_AIManager.LeftMouseUp( xPos, yPos );
+		    break;
+	    }
+        if ( message == WM_RBUTTONUP )
+        {
+            g_AIManager.RightMouseUp( xPos, yPos );
+            break;
+        }
+        break;
+    }
     case WM_PAINT:
         hdc = BeginPaint( hWnd, &ps );
         EndPaint( hWnd, &ps );

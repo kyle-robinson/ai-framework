@@ -117,9 +117,14 @@ void AIManager::update(const float fDeltaTime)
     AddItemToDrawList( m_pCar2 );
 }
 
-void AIManager::mouseUp( int x, int y )
+void AIManager::LeftMouseUp( const int x, const int y )
 {
     m_pCar->setPositionTo( Vector2D( x, y ) );
+}
+
+void AIManager::RightMouseUp( const int x, const int y )
+{
+    m_pCar2->setPositionTo( Vector2D( x, y ) );
 }
 
 void AIManager::keyPress(WPARAM param)
