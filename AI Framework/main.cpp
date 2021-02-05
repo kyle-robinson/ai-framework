@@ -599,7 +599,8 @@ void DrawItem(DrawableGameObject* object)
 
 void AddItemToDrawList(DrawableGameObject* object)
 {
-    g_GameObjects.push_back(object);
+    if ( object != nullptr )
+        g_GameObjects.push_back(object);
 }
 
 void Update(const float deltaTime)

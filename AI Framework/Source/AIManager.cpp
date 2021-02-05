@@ -3,12 +3,22 @@
 #include "DrawableGameObject.h"
 #include "PickupItem.h"
 #include "Waypoint.h"
+#include "ErrorLogger.h"
 
 #include "main.h"
 #include <sstream>
 
 Waypoint* AIManager::GetWaypoint( const int x, const int y )
 {
+    static bool runOnce = true;
+    bool xOutOfRange = ( x < 0 || x > 19 ) ? true : false;
+    bool yOutOfRange = ( y < 0 || y > 19 ) ? true : false;
+    if ( ( xOutOfRange || yOutOfRange ) && runOnce )
+    {
+        ErrorLogger::Log( std::string( "Waypoint out of range! (" ) + std::to_string( x ) + ", " + std::to_string( y ) + ')' );
+        runOnce = false;
+        return nullptr;
+    }
     return m_waypoints.at( y * WAYPOINT_RESOLUTION + x );
 }
 
@@ -57,6 +67,9 @@ void AIManager::update(const float fDeltaTime)
         //AddItemToDrawList(m_waypoints[i]); // if you comment this in, it will display the waypoints
     }
 
+    AddItemToDrawList( GetWaypoint( 19, 1 ) );
+    AddItemToDrawList( GetWaypoint( 17, 1 ) );
+    AddItemToDrawList( GetWaypoint( 12, 1 ) );
     AddItemToDrawList( GetWaypoint( 5, 1 ) );
 
     for (unsigned int i = 0; i < m_pickups.size(); i++) {

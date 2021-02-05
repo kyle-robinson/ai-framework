@@ -32,7 +32,9 @@
     <ClCompile Include="Source\Background.cpp" />
     <ClCompile Include="Source\DDSTextureLoader.cpp" />
     <ClCompile Include="Source\DrawableGameObject.cpp" />
+    <ClCompile Include="Source\ErrorLogger.cpp" />
     <ClCompile Include="Source\PickupItem.cpp" />
+    <ClCompile Include="Source\StringConverter.cpp" />
     <ClCompile Include="Source\Vehicle.cpp" />
     <ClCompile Include="Source\Waypoint.cpp" />
   </ItemGroup>
@@ -41,7 +43,9 @@
     <ClInclude Include="Headers\Background.h" />
     <ClInclude Include="Headers\DDSTextureLoader.h" />
     <ClInclude Include="Headers\DrawableGameObject.h" />
+    <ClInclude Include="Headers\ErrorLogger.h" />
     <ClInclude Include="Headers\PickupItem.h" />
+    <ClInclude Include="Headers\StringConverter.h" />
     <ClInclude Include="Headers\structures.h" />
     <ClInclude Include="Headers\Vector2D.h" />
     <ClInclude Include="Headers\Vehicle.h" />
