@@ -1,10 +1,12 @@
 #pragma once
+#ifndef AIMANAGER_H
+#define AIMANAGER_H
 
+#include <vector>
 #include <d3d11_1.h>
 #include <d3dcompiler.h>
 #include <directxcolors.h>
 #include <DirectXCollision.h>
-#include <vector>
 
 using namespace std;
 struct Vector2D;
@@ -24,7 +26,8 @@ class AIManager
 {
 public:
 	Waypoint* GetWaypoint( const int x, const int y );
-	std::vector<Waypoint*> GetNeighbours( const int x, const int y );
+	vecWaypoints GetNeighbours( const int x, const int y );
+	vecWaypoints GetWaypoints() const noexcept { return m_waypoints; }
 
 	HRESULT initialise(ID3D11Device* pd3dDevice, UINT width, UINT height);
 	void	update(const float fDeltaTime);
@@ -43,9 +46,11 @@ private:
 	UINT width;
 	UINT height;
 
-	vecWaypoints            m_waypoints;
-	vecPickups              m_pickups;
-	Vehicle*				m_pCar = nullptr;
-	Vehicle*				m_pCar2 = nullptr;
+	vecWaypoints m_waypoints;
+	vecPickups m_pickups;
+	Vehicle* m_pCar = nullptr;
+	Vehicle* m_pCar2 = nullptr;
+	std::vector<Vector2D> path;
 };
 
+#endif

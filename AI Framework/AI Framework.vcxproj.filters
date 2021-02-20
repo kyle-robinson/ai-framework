@@ -19,9 +19,6 @@
     <Filter Include="Source\Model">
       <UniqueIdentifier>{21450eca-a12e-4993-9b45-fc18d5d8087e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\AI">
-      <UniqueIdentifier>{4ad71e7f-f0e4-435f-bff7-f689614d1ed7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Headers\Entities">
       <UniqueIdentifier>{1b064da8-229f-4e1e-9e9a-4c57b8e6a617}</UniqueIdentifier>
     </Filter>
@@ -36,6 +33,9 @@
     </Filter>
     <Filter Include="Source\Utility">
       <UniqueIdentifier>{07e40881-c49f-4a14-9748-d4ca22168211}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\AI">
+      <UniqueIdentifier>{261e9702-c484-48b0-8d85-65ab45b5d6e0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -69,14 +69,11 @@
     <ClCompile Include="Source\StringConverter.cpp">
       <Filter>Source\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="Source\PathFinder.cpp">
+      <Filter>Source\AI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Headers\AIManager.h">
-      <Filter>Headers\AI</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Waypoint.h">
-      <Filter>Headers\AI</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\structures.h">
       <Filter>Headers\Utility</Filter>
     </ClInclude>
@@ -109,6 +106,15 @@
     </ClInclude>
     <ClInclude Include="Headers\StringConverter.h">
       <Filter>Headers\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\PathFinder.h">
+      <Filter>Headers\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\AIManager.h">
+      <Filter>Headers\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Waypoint.h">
+      <Filter>Headers\AI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

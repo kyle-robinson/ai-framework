@@ -1,5 +1,9 @@
 #pragma once
+#ifndef WAYPOINT_H
+#define WAYPOINT_H
+
 #include "DrawableGameObject.h"
+
 class Waypoint :
     public DrawableGameObject
 {
@@ -15,3 +19,5 @@ private:
     bool m_isCheckpoint;
     bool m_visible;
 };
+
+#endif

@@ -1,9 +1,9 @@
 #include "AIManager.h"
 #include "Vehicle.h"
-#include "DrawableGameObject.h"
 #include "PickupItem.h"
-#include "Waypoint.h"
 #include "ErrorLogger.h"
+#include "PathFinder.h"
+#include "Vector2D.h"
 
 #include "main.h"
 #include <sstream>
@@ -22,7 +22,7 @@ Waypoint* AIManager::GetWaypoint( const int x, const int y )
     return m_waypoints.at( y * WAYPOINT_RESOLUTION + x );
 }
 
-std::vector<Waypoint*> AIManager::GetNeighbours( const int x, const int y )
+vecWaypoints AIManager::GetNeighbours( const int x, const int y )
 {
     std::vector<Waypoint*> neighbours;
     int waypointIndex = y * WAYPOINT_RESOLUTION + x;
@@ -93,13 +93,13 @@ void AIManager::update(const float fDeltaTime)
     // waypoints
     for (unsigned int i = 0; i < m_waypoints.size(); i++) {
         m_waypoints[i]->update(fDeltaTime);
-        //AddItemToDrawList(m_waypoints[i]); // if you comment this in, it will display the waypoints
+        AddItemToDrawList(m_waypoints[i]); // if you comment this in, it will display the waypoints
     }
 
     AddItemToDrawList( GetWaypoint( 9, 1 ) );
     AddItemToDrawList( GetWaypoint( 5, 1 ) );
 
-    std::vector<Waypoint*> neighbours = GetNeighbours( 19, 10 );
+    vecWaypoints neighbours = GetNeighbours( 19, 10 );
     for ( unsigned int i = 0; i < neighbours.size(); i++ )
         AddItemToDrawList( neighbours[i] );
 
@@ -125,12 +125,24 @@ void AIManager::update(const float fDeltaTime)
 
 void AIManager::LeftMouseUp( const int x, const int y )
 {
-    m_pCar->setPositionTo( Vector2D( x, y ) );
+    //m_pCar->setPositionTo( Vector2D( x, y ) );
+
+    static PathFinder pathFinder;
+    path.push_back(
+        pathFinder.GetPathBetween(
+            Vector2D( m_pCar->getPosition()->x, m_pCar->getPosition()->y ),
+            Vector2D( x, y )
+        )[0]
+    );
 }
 
 void AIManager::RightMouseUp( const int x, const int y )
 {
-    m_pCar2->setPositionTo( Vector2D( x, y ) );
+    //m_pCar2->setPositionTo( Vector2D( x, y ) );
+
+    static int count = 0;
+    if( count < path.size() )
+        m_pCar->setPositionTo( path[count++] );
 }
 
 void AIManager::keyPress(WPARAM param)
