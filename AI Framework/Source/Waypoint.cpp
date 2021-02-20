@@ -14,30 +14,32 @@ std::vector<int> vecOffTrack400{ 0,1,2,3,23,8,9,10,11,12,13,14,15,16,17,18,19,39
 
 std::vector<int> vecCheckpoint{ 311,239,159,58,54,93,176,209,264,87,47,44,162,240,362};
 
-HRESULT	Waypoint::initMesh(ID3D11Device* pd3dDevice, const int index)
+HRESULT	Waypoint::initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, const int index )
 {
 	m_visible = true;
 	m_isCheckpoint = false;
 	m_isOnTrack = false;
 
-	if (std::find(vecOffTrack400.begin(), vecOffTrack400.end(), index) == vecOffTrack400.end()) {
+	if ( std::find( vecOffTrack400.begin(), vecOffTrack400.end(), index ) == vecOffTrack400.end() )
+	{
 		m_isOnTrack = true;
-		if (std::find(vecCheckpoint.begin(), vecCheckpoint.end(), index) != vecCheckpoint.end()) {
-			setTextureName(L"Resources\\Textures\\yellow.dds");
+		if ( std::find( vecCheckpoint.begin(), vecCheckpoint.end(), index ) != vecCheckpoint.end() )
+		{
+			setTextureName( L"Resources\\Textures\\yellow.dds" );
 			m_isCheckpoint = true;
 		}
-		else {
-			setTextureName(L"Resources\\Textures\\red.dds");
+		else
+		{
+			setTextureName( L"Resources\\Textures\\red.dds" );
 		}
 	}
 	else {
 		m_isOnTrack = false;
 		float s = 10;
-		m_scale = XMFLOAT3(s, s, s);
-		setTextureName(L"Resources\\Textures\\blue.dds");
+		m_scale = { s, s, s };
+		setTextureName( L"Resources\\Textures\\blue.dds" );
 	}
 
-	HRESULT hr = DrawableGameObject::initMesh(pd3dDevice);
-
+	HRESULT hr = DrawableGameObject::initMesh( pd3dDevice );
 	return hr;
 }

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef VECTOR2D_H
+#define VECTOR2D_H
 
 //------------------------------------------------------------------------
 //  Vector2d - Author: Mat Buckland
@@ -417,3 +419,5 @@ inline Vector2D operator-(const Vector2D& lhs, const XMFLOAT3& rhs)
     result.y -= rhs.y;
     return result;
 }
+
+#endif

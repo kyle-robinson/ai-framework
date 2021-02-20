@@ -22,9 +22,9 @@ std::vector<Vector2D> PathFinder::GetPathBetween( Vector2D startPosition, Vector
 	Waypoint* nearestToCar = GetNearestWaypointToPosition( startPosition );
 	Waypoint* nearestToEnd = GetNearestWaypointToPosition( endPosition );
 
-	if (nearestToCar == NULL ||
-		nearestToEnd == NULL ||
-		nearestToCar == nearestToEnd)
+	if ( nearestToCar == NULL ||
+		 nearestToEnd == NULL ||
+		 nearestToCar == nearestToEnd )
 	{
 		path.push_back( endPosition );
 		return path;

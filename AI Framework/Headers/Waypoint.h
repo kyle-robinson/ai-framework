@@ -4,15 +4,14 @@
 
 #include "DrawableGameObject.h"
 
-class Waypoint :
-    public DrawableGameObject
+class Waypoint : public DrawableGameObject
 {
 public:
-    virtual HRESULT initMesh(ID3D11Device* pd3dDevice, const int index);
+    virtual HRESULT initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, const int index );
 
-    bool isOnTrack() { return m_isOnTrack; }
-    void setVisible(const bool visible) { m_visible = visible; }
-    bool isVisible() {return m_visible;}
+    bool isOnTrack() const noexcept { return m_isOnTrack; }
+    void setVisible( const bool visible ) noexcept { m_visible = visible; }
+    bool isVisible() const noexcept { return m_visible; }
 
 private:
     bool m_isOnTrack;

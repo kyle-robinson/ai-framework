@@ -1,17 +1,13 @@
 #pragma once
-using namespace std;
-using namespace DirectX;
-
-//--------------------------------------------------------------------------------------
-// Structures
-//--------------------------------------------------------------------------------------
+#ifndef STRUCTURES_H
+#define STRUCTURES_H
 
 #include <vector>
+using namespace DirectX;
+
 class DrawableGameObject;
 class Waypoint;
 class PickupItem;
-
-using namespace std;
 
 struct ConstantBuffer
 {
@@ -20,10 +16,11 @@ struct ConstantBuffer
 	XMMATRIX mProjection;
 };
 
-
 struct SimpleVertex
 {
 	XMFLOAT3 Pos;
 	XMFLOAT3 Normal;
 	XMFLOAT2 TexCoord;
 };
+
+#endif
