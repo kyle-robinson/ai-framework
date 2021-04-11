@@ -37,17 +37,17 @@ void Vehicle::update( const float deltaTime )
 
 	// rotate the object based on its last & current position
 	Vector2D diff = m_currentPosition - m_lastPosition;
-	if ( diff.Length() > 0 )
+	m_lastPosition = m_currentPosition;
+	if ( diff.Length() > 0.1 )
 	{ // if zero then don't update rotation
 		diff.Normalize();
 		m_radianRotation = atan2f( diff.y, diff.x ); // this is used by DrawableGameObject to set the rotation
 	}
-	m_lastPosition = m_currentPosition;
 
 	// set the current poistion for the drawablegameobject
 	setPosition( { static_cast<float>( m_currentPosition.x ), static_cast<float>( m_currentPosition.y ), 0 } );
 
-	DrawableGameObject::update(deltaTime);
+	DrawableGameObject::update( deltaTime );
 }
 
 // a ratio: a value between 0 and 1 (1 being max speed)
@@ -71,5 +71,5 @@ void Vehicle::setVehiclePosition( Vector2D position )
 	m_currentPosition = position;
 	m_positionTo = position;
 	m_startPosition = position;
-	setPosition( { static_cast<float>( position.x ), static_cast<float>( position.y ), 0 });
+	setPosition( { static_cast<float>( position.x ), static_cast<float>( position.y ), 0 } );
 }

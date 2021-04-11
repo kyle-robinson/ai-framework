@@ -611,7 +611,7 @@ void Render()
     static float deltaTime = 0.0f;
     static ULONGLONG timeStart = 0;
     ULONGLONG timeCur = GetTickCount64();
-    if( timeStart == 0 ) timeStart = timeCur;
+    if ( timeStart == 0 ) timeStart = timeCur;
     deltaTime = ( timeCur - timeStart ) / 1000.0f;
 	timeStart = timeCur;
 
@@ -626,13 +626,13 @@ void Render()
     g_pImmediateContext->PSSetShader( g_pPixelShader, nullptr, 0 );
 
     // draw the background
-    setupTransformConstantBuffer( XMLoadFloat4x4( g_background.getTransform()), XMMatrixIdentity(), XMMatrixIdentity() );
+    setupTransformConstantBuffer( XMLoadFloat4x4( g_background.getTransform() ), XMMatrixIdentity(), XMMatrixIdentity() );
     g_pImmediateContext->PSSetShaderResources( 0, 1, g_background.getTextureResourceView() );
     g_pImmediateContext->PSSetSamplers( 0, 1, g_background.getTextureSamplerState() );
     g_background.draw( g_pd3dDevice, g_pImmediateContext );
     
     // draw the vehicles / nodes
-	for( unsigned int i=0; i< g_GameObjects.size(); i++ ) 
+	for( uint32_t i = 0; i < g_GameObjects.size(); i++ ) 
         DrawItem( g_GameObjects[i] );
 
     g_GameObjects.clear(); // the list of items to draw is cleared each frame
@@ -669,7 +669,7 @@ void pick( int mouse_x, int mouse_y )
     rayDir = XMVector3Normalize( rayDir );
 
     XMVECTOR cubePos;
-    for ( unsigned int i = 0; i < g_waypoints.size(); i++ )
+    for ( uint32_t i = 0; i < g_waypoints.size(); i++ )
     {
         XMMatrixDecompose( &dummy, &dummy, &cubePos,
             XMLoadFloat4x4( g_waypoints[i]->getTransform() )

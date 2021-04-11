@@ -39,7 +39,7 @@ std::vector<Vector2D> PathFinder::GetPathBetween( Vector2D startPosition, Vector
 	AStarNode* currentNode;
 	while ( !OPEN_List.empty() )
 	{
-		for ( unsigned int i = 0; i < OPEN_List.size(); i++ )
+		for ( uint32_t i = 0u; i < OPEN_List.size(); i++ )
 		{
 			if ( currentNode == NULL || OPEN_List[i]->cost < currentNode->cost )
 			{
@@ -77,10 +77,10 @@ void PathFinder::SetEdgeCosts()
 {
 	vecWaypoints waypoints = aiManager.GetWaypoints();
 
-	for ( unsigned int i = 0; i < waypoints.size(); i++ )
+	for ( uint32_t i = 0u; i < waypoints.size(); i++ )
 	{
 		vecWaypoints neighbours = aiManager.GetNeighbours( waypoints[i]->getPosition()->x, waypoints[i]->getPosition()->y );
-		for ( unsigned int j = 0; j < neighbours.size(); j++ )
+		for ( uint32_t j = 0u; j < neighbours.size(); j++ )
 		{
 			Waypoint* waypointFrom = waypoints[i];
 			Waypoint* waypointTo = waypoints[j];
@@ -96,7 +96,7 @@ Waypoint* PathFinder::GetNearestWaypointToPosition( Vector2D position )
 	float nearestDist = FLT_MAX;
 	Waypoint* nearestWp = NULL;
 
-	for ( unsigned int i = 0; i < waypoints.size(); i++ )
+	for ( uint32_t i = 0u; i < waypoints.size(); i++ )
 	{
 		Vector2D vecBetweenPoints = position - Vector2D( waypoints[i]->getPosition()->x, waypoints[i]->getPosition()->y );
 		double vecLength = vecBetweenPoints.Length();
@@ -112,7 +112,7 @@ Waypoint* PathFinder::GetNearestWaypointToPosition( Vector2D position )
 
 double PathFinder::GetCostBetweenWaypoints( Waypoint* from, Waypoint* to )
 {
-	for ( unsigned int i = 0; i < EDGECOST_List.size(); i++ )
+	for ( uint32_t i = 0u; i < EDGECOST_List.size(); i++ )
 		if ( EDGECOST_List[i]->wayPointFROM == from || EDGECOST_List[i]->wayPointTO == to )
 			return EDGECOST_List[i]->cost;
 	return FLT_MAX;
@@ -141,7 +141,7 @@ std::vector<Vector2D> PathFinder::ConstructPath( AStarNode* targetNode, Vector2D
 
 bool PathFinder::IsInList( std::vector<AStarNode*> listToCheck, Waypoint* waypointToCheck )
 {
-	for ( unsigned int i = 0; i < listToCheck.size(); i++ )
+	for ( uint32_t i = 0u; i < listToCheck.size(); i++ )
 		if ( listToCheck[i]->internalWaypoint == waypointToCheck )
 			return true;
 	return false;

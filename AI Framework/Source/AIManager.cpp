@@ -49,8 +49,8 @@ HRESULT AIManager::initialise( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, 
     
     // create a pickup item ----------------------------------------------
     PickupItem* pPickup = new PickupItem();
-    HRESULT hr = pPickup->initMesh(pd3dDevice);
-    m_pickups.push_back(pPickup);
+    HRESULT hr = pPickup->initMesh( pd3dDevice );
+    m_pickups.push_back( pPickup );
 
     // create the vehicle ------------------------------------------------
     float xPos = 0;
@@ -58,7 +58,7 @@ HRESULT AIManager::initialise( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, 
 
     m_pCar = new Vehicle();
     hr = m_pCar->initMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_blue.dds" );
-    m_pCar->setPosition(XMFLOAT3(xPos, yPos, 0));
+    m_pCar->setPosition( XMFLOAT3( xPos, yPos, 0.0f ) );
     if ( FAILED( hr ) ) return hr;
 
     m_pCar2 = new Vehicle();
@@ -72,10 +72,10 @@ HRESULT AIManager::initialise( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, 
     float xStart = -( SCREEN_WIDTH / 2 ) + ( xGap / 2 );
     float yStart = -( SCREEN_HEIGHT / 2 ) + ( yGap / 2 );
 
-    unsigned int index = 0;
-    for ( unsigned int j = 0; j < WAYPOINT_RESOLUTION; j++ )
+    uint32_t index = 0;
+    for ( uint32_t j = 0; j < WAYPOINT_RESOLUTION; j++ )
     {
-        for ( unsigned int i = 0; i < WAYPOINT_RESOLUTION; i++ )
+        for ( uint32_t i = 0; i < WAYPOINT_RESOLUTION; i++ )
         {
             Waypoint* wp = new Waypoint();
             hr = wp->initMesh( pd3dDevice, index++ );
@@ -90,21 +90,21 @@ HRESULT AIManager::initialise( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, 
 void AIManager::update( const float fDeltaTime )
 {
     // waypoints
-    for ( unsigned int i = 0; i < m_waypoints.size(); i++ )
+    for ( uint32_t i = 0; i < m_waypoints.size(); i++ )
     {
-        m_waypoints[i]->update(fDeltaTime);
-        AddItemToDrawList(m_waypoints[i]); // if you comment this in, it will display the waypoints
+        m_waypoints[i]->update( fDeltaTime );
+        AddItemToDrawList( m_waypoints[i] ); // if you comment this in, it will display the waypoints
     }
 
     AddItemToDrawList( GetWaypoint( 9, 1 ) );
     AddItemToDrawList( GetWaypoint( 5, 1 ) );
 
     vecWaypoints neighbours = GetNeighbours( 19, 10 );
-    for ( unsigned int i = 0; i < neighbours.size(); i++ )
+    for ( uint32_t i = 0; i < neighbours.size(); i++ )
         AddItemToDrawList( neighbours[i] );
 
     // pickups
-    for ( unsigned int i = 0; i < m_pickups.size(); i++ )
+    for ( uint32_t i = 0; i < m_pickups.size(); i++ )
     {
         m_pickups[i]->update( fDeltaTime );
         AddItemToDrawList( m_pickups[i] );
@@ -116,12 +116,11 @@ void AIManager::update( const float fDeltaTime )
     checkForCollisions( m_pCar );
     AddItemToDrawList( m_pCar );
 
-
     //checkWallWrapping( m_pCar2 );
-    m_pCar2->update( fDeltaTime );
-    Wander( m_pCar2 );
-    checkForCollisions( m_pCar2 );
-    AddItemToDrawList( m_pCar2 );
+    //m_pCar2->update( fDeltaTime );
+    //Wander( m_pCar2 );
+    //checkForCollisions( m_pCar2 );
+    //AddItemToDrawList( m_pCar2 );
 }
 
 void AIManager::LeftMouseUp( const int x, const int y )
