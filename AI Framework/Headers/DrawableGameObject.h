@@ -23,7 +23,7 @@ public:
 	virtual ~DrawableGameObject();
 
 	virtual HRESULT initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice );
-	virtual void update( const float t );
+	virtual void update( const float deltaTime );
 	void draw( Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext );
 
 	ID3D11ShaderResourceView** getTextureResourceView() { return &m_pTextureResourceView; 	}
@@ -51,7 +51,7 @@ protected:
 	Vector2D m_scale;
 	Vector2D m_position;
 	//Vector2D m_direction;
-	//float m_radianRotation;
+	float m_radianRotation;
 	double m_dBoundingRadius;
 private:
 	ID3D11Buffer* m_pVertexBuffer;

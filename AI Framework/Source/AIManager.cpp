@@ -60,11 +60,6 @@ HRESULT AIManager::Initialise( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, 
     HRESULT hr = m_pCar->InitMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_blue.dds" );
     m_pCar->Steering()->ArriveOn();
 
-    //m_pCar = new Vehicle();
-    //hr = m_pCar->initMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_blue.dds" );
-    //m_pCar->setPosition( XMFLOAT3( xPos, yPos, 0.0f ) );
-    //if ( FAILED( hr ) ) return hr;
-
     //m_pCar2 = new Vehicle();
     //hr = m_pCar2->initMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_red.dds" );
     //m_pCar2->setPositionTo( XMFLOAT3( width / 2, 0.0f, 0 ) );
@@ -110,11 +105,11 @@ void AIManager::Update( const float fDeltaTime )
     //    AddItemToDrawList( neighbours[i] );
 
     // pickups
-    for ( uint32_t i = 0; i < m_pickups.size(); i++ )
-    {
-        m_pickups[i]->update( fDeltaTime );
-        AddItemToDrawList( m_pickups[i] );
-    }
+    //for ( uint32_t i = 0; i < m_pickups.size(); i++ )
+    //{
+    //    m_pickups[i]->update( fDeltaTime );
+    //    AddItemToDrawList( m_pickups[i] );
+    //}
 
     // cars
     //checkWallWrapping( m_pCar );

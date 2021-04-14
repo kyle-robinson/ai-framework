@@ -3,7 +3,8 @@
 DrawableGameObject::DrawableGameObject( Vector2D position, double radius ) :
 	m_position( position ),
 	m_dBoundingRadius( radius ),
-	m_scale( { 10.0f, 10.0f } )
+	m_scale( { 10.0f, 10.0f } ),
+	m_radianRotation( 0.0f )
 {
 	m_pVertexBuffer = nullptr;
 	m_pIndexBuffer = nullptr;
@@ -12,21 +13,8 @@ DrawableGameObject::DrawableGameObject( Vector2D position, double radius ) :
 
 	// Initialize the world matrix
 	XMStoreFloat4x4( &m_world, DirectX::XMMatrixIdentity() );
-
-	//m_position = { 0, 0 };
-	//m_direction = { 1, 0 };
-	//m_scale = { 10, 10 };
 	SetTextureName( L"Resources\\Textures\\stone.dds" );
-
-	//m_radianRotation = 0;
 }
-
-/*void DrawableGameObject::SetDirection( XMFLOAT3 direction )
-{
-	XMVECTOR v = XMLoadFloat3( &direction );
-	v = XMVector3Normalize( v );
-	XMStoreFloat3( &XMFLOAT3( m_direction.x, m_direction.y, 0.0f ), v );
-}*/
 
 DrawableGameObject::~DrawableGameObject()
 {
@@ -137,13 +125,12 @@ HRESULT DrawableGameObject::initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dD
 	return hr;
 }
 
-void DrawableGameObject::update( float deltaTime )
+void DrawableGameObject::update( const float deltaTime )
 {
-	//XMMATRIX mRotate = DirectX::XMMatrixRotationZ( m_radianRotation );
+	XMMATRIX mRotate = DirectX::XMMatrixRotationZ( m_radianRotation );
 	XMMATRIX mTranslate = DirectX::XMMatrixTranslation( m_position.x, m_position.y, 1.0f );
 	XMMATRIX mScale = DirectX::XMMatrixScaling( m_scale.x, m_scale.y, 10.0f );
-	//XMStoreFloat4x4( &m_world, mScale * mRotate * mTranslate );
-	XMStoreFloat4x4( &m_world, mScale * mTranslate );
+	XMStoreFloat4x4( &m_world, mScale * mRotate * mTranslate );
 }
 
 XMFLOAT3 DrawableGameObject::addFloat3( XMFLOAT3& f1, XMFLOAT3& f2 )
