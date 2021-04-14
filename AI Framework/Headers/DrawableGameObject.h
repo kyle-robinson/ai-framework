@@ -12,13 +12,14 @@
 #include "DDSTextureLoader.h"
 #include "structures.h"
 #include "resource.h"
+#include "Vector2D.h"
 
 #define NUM_VERTICES 36
 
 class DrawableGameObject
 {
 public:
-	DrawableGameObject();
+	DrawableGameObject( Vector2D position, double radius );
 	virtual ~DrawableGameObject();
 
 	virtual HRESULT initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice );
@@ -29,12 +30,15 @@ public:
 	XMFLOAT4X4* getTransform() { return &m_world; }
 	ID3D11SamplerState** getTextureSamplerState() { return &m_pSamplerLinear; }
 
-	void setPosition( XMFLOAT3 position );
-	XMFLOAT3* getPosition() noexcept { return &m_position; }
-	XMFLOAT3* getDirection() noexcept { return &m_direction; }
+	void SetPosition( Vector2D position ) noexcept { m_position = position; }
+	Vector2D GetPosition() const noexcept { return m_position; }
+	//Vector2D GetDirection() const noexcept { return m_direction; }
+
+	double GetBoundingRadius() const noexcept { return m_dBoundingRadius; }
+	void SetBoundingRadius( double boundingRadius ) noexcept { m_dBoundingRadius = boundingRadius; }
 protected:
-	void setDirection( XMFLOAT3 direction );
-	void setTextureName( std::wstring texName ) noexcept { m_textureName = texName; }
+	//void SetDirection( XMFLOAT3 direction );
+	void SetTextureName( std::wstring texName ) noexcept { m_textureName = texName; }
 
 	// helper functions
 	XMFLOAT3 addFloat3( XMFLOAT3& f1, XMFLOAT3& f2 );
@@ -44,8 +48,11 @@ protected:
 	XMFLOAT3 multiplyFloat3( XMFLOAT3& f1, const float scalar );
 	XMFLOAT3 divideFloat3( XMFLOAT3& f1, const float scalar );
 
-	XMFLOAT3 m_scale;
-	float m_radianRotation;
+	Vector2D m_scale;
+	Vector2D m_position;
+	//Vector2D m_direction;
+	//float m_radianRotation;
+	double m_dBoundingRadius;
 private:
 	ID3D11Buffer* m_pVertexBuffer;
 	ID3D11Buffer* m_pIndexBuffer;
@@ -53,8 +60,6 @@ private:
 	ID3D11SamplerState* m_pSamplerLinear;
 	
 	XMFLOAT4X4 m_world;
-	XMFLOAT3 m_position;
-	XMFLOAT3 m_direction;
 	std::wstring m_textureName;	
 };
 

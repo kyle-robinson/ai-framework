@@ -399,7 +399,7 @@ HRESULT InitDevice()
     }
 
     // initialise the AI / SceneManager
-    g_AIManager.initialise( g_pd3dDevice, SCREEN_WIDTH, SCREEN_HEIGHT );
+    g_AIManager.Initialise( g_pd3dDevice, SCREEN_WIDTH, SCREEN_HEIGHT );
 
     return S_OK;
 }
@@ -539,12 +539,12 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam 
         yPos *= -1;
 	    if ( message == WM_LBUTTONUP )
 	    {
-            g_AIManager.LeftMouseUp( xPos, yPos );
+            g_AIManager.SetCrosshair( xPos, yPos );
 		    break;
 	    }
         if ( message == WM_RBUTTONUP )
         {
-            g_AIManager.RightMouseUp( xPos, yPos );
+            //g_AIManager.RightMouseUp( xPos, yPos );
             break;
         }
         break;
@@ -559,8 +559,8 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam 
         break;
 
     case WM_KEYDOWN:
-         g_AIManager.keyPress( wParam );
-         break;
+        //g_AIManager.keyPress( wParam );
+        break;
 
     default:
         return DefWindowProc( hWnd, message, wParam, lParam );
@@ -599,7 +599,7 @@ void AddItemToDrawList( DrawableGameObject* object )
 
 void Update( const float deltaTime )
 {
-    g_AIManager.update( deltaTime );
+    g_AIManager.Update( deltaTime );
 }
 
 //--------------------------------------------------------------------------------------

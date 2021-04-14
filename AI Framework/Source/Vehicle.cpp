@@ -1,25 +1,53 @@
 #include "Vehicle.h"
+#include "AIManager.h"
+#include "SteeringBehaviour.h"
 
-HRESULT	Vehicle::initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, const std::wstring& texturePath )
+Vehicle::Vehicle(
+		AIManager* aiManager,
+		Vector2D position,
+		double rotation,
+		Vector2D velocity,
+		double mass,
+		double maxForce,
+		double maxSpeed,
+		double maxTurnRate
+	)
+	:
+	MovingEntity(
+		position,
+		3.0f,
+		velocity,
+		maxSpeed,
+		Vector2D( sin( rotation ), -cos( rotation ) ),
+		mass,
+		maxTurnRate,
+		maxForce
+	),
+	m_pWorld( aiManager )
 {
-	m_scale = { 30, 20, 1 };
-	setTextureName( texturePath );
+	m_pSteering = new SteeringBehaviour( this );
+}
+
+HRESULT	Vehicle::InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, const std::wstring& texturePath )
+{
+	m_scale = { 30, 20 };
+	SetTextureName( texturePath );
 	HRESULT hr = DrawableGameObject::initMesh( pd3dDevice );
 
 	//m_maxSpeed = 200;
-	setMaxSpeed( MAX_SPEED );
-	setVehiclePosition( { 0, 0 } );
+	//setMaxSpeed( MAX_SPEED );
+	//setVehiclePosition( { 0, 0 } );
 	
-	m_lastPosition = { 0, 0 };
-	m_currentSpeed = m_maxSpeed;
+	//m_lastPosition = { 0, 0 };
+	//m_currentSpeed = m_maxSpeed;
 
 	return hr;
 }
 
-void Vehicle::update( const float deltaTime )
+void Vehicle::Update( const float deltaTime )
 {
 	// consider replacing with force based acceleration / velocity calculations
-	Vector2D vecTo = m_positionTo - m_currentPosition;
+	/*Vector2D vecTo = m_positionTo - m_currentPosition;
 	float velocity = deltaTime * m_currentSpeed;
 
 	float length = static_cast<float>( vecTo.Length() );
@@ -45,13 +73,46 @@ void Vehicle::update( const float deltaTime )
 	}
 
 	// set the current poistion for the drawablegameobject
-	setPosition( { static_cast<float>( m_currentPosition.x ), static_cast<float>( m_currentPosition.y ), 0 } );
+	setPosition( { static_cast<float>( m_currentPosition.x ), static_cast<float>( m_currentPosition.y ), 0 } );*/
+
+	//keep a record of its old position so we can update its cell later
+	//in this method
+	Vector2D OldPos = GetPosition();
+
+	Vector2D SteeringForce;
+
+	//calculate the combined force from each steering behavior in the 
+	//vehicle's list
+	SteeringForce = m_pSteering->Calculate();
+
+	//Acceleration = Force/Mass
+	Vector2D acceleration = SteeringForce / m_dMass;
+
+	//update velocity
+	m_vVelocity += acceleration * deltaTime;
+
+	//make sure vehicle does not exceed maximum velocity
+	m_vVelocity.Truncate( m_dMaxSpeed );
+
+	//update the position
+	m_position += m_vVelocity * deltaTime;
+
+	//update the heading if the vehicle has a non zero velocity
+	if ( m_vVelocity.LengthSq() > 0.00000001 )
+	{
+		m_vHeading = Vec2DNormalize( m_vVelocity );
+
+		m_vSide = m_vHeading.Perp();
+	}
+
+	//treat the screen as a toroid
+	WrapAround( m_position, 1024, 768 );
 
 	DrawableGameObject::update( deltaTime );
 }
 
 // a ratio: a value between 0 and 1 (1 being max speed)
-void Vehicle::setCurrentSpeed( const float speed )
+/*void Vehicle::setCurrentSpeed( const float speed )
 {
 	m_currentSpeed = m_maxSpeed * speed;
 	m_currentSpeed = max( 0, m_currentSpeed );
@@ -72,4 +133,4 @@ void Vehicle::setVehiclePosition( Vector2D position )
 	m_positionTo = position;
 	m_startPosition = position;
 	setPosition( { static_cast<float>( position.x ), static_cast<float>( position.y ), 0 } );
-}
+}*/

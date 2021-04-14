@@ -8,19 +8,15 @@
 #include <d3dcompiler.h>
 #include <directxcolors.h>
 #include <DirectXCollision.h>
+//#include "Vector2D.h"
+#include "Vehicle.h"
 
-struct Vector2D;
-
-class Vehicle;
-class DrawableGameObject;
 class PickupItem;
 class Waypoint;
 
 typedef std::vector<DrawableGameObject*> vecDrawables;
 typedef std::vector<Waypoint*> vecWaypoints;
 typedef std::vector<PickupItem*> vecPickups;
-
-enum Deceleration { slow = 3, normal = 2, fast = 1 };
 
 class AIManager
 {
@@ -29,25 +25,31 @@ public:
 	vecWaypoints GetNeighbours( const int x, const int y );
 	vecWaypoints GetWaypoints() const noexcept { return m_waypoints; }
 
-	HRESULT initialise( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, UINT width, UINT height );
-	void update( const float fDeltaTime );
-	void LeftMouseUp( const int x, int y );
-	void RightMouseUp( const int x, int y );
-	void keyPress( WPARAM param );
+	HRESULT Initialise( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, UINT width, UINT height );
+	void Update( const float fDeltaTime );
+	void HandleKeyPresses( WPARAM param );
+	
+	Vector2D GetCrosshair() const noexcept { return m_crosshair; }
+	void SetCrosshair( const double x, const double y ) noexcept { m_crosshair = { x, y }; }
 protected:
-	void checkWallWrapping( Vehicle* car );
+	//void checkWallWrapping( Vehicle* car );
 	bool checkForCollisions( Vehicle* car );
-	void Wander( Vehicle* car );
-	Vector2D Flee( Vector2D TargetPos );
-	Vector2D Arrive( Vector2D TargetPos, Deceleration deceleration );
+	//void Wander( Vehicle* car );
+	//Vector2D Flee( Vector2D TargetPos );
+	//Vector2D Arrive( Vector2D TargetPos, Deceleration deceleration );
 private:
+	void TogglePause() noexcept { m_paused = !m_paused; }
+	bool Paused() const noexcept { return m_paused; }
+
 	UINT width;
 	UINT height;
 
+	bool m_paused = false;
 	vecWaypoints m_waypoints;
 	vecPickups m_pickups;
-	Vehicle* m_pCar = nullptr;
-	Vehicle* m_pCar2 = nullptr;
+	Vector2D m_crosshair;
+	Vehicle* m_pCar;
+	//Vehicle* m_pCar2 = nullptr;
 	std::vector<Vector2D> path;
 };
 

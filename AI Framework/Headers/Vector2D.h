@@ -5,8 +5,9 @@
 //------------------------------------------------------------------------
 //  Vector2d - Author: Mat Buckland
 //------------------------------------------------------------------------
-#include <windows.h>
 #include <limits>
+#include <iostream>
+#include <windows.h>
 
 const double  MinDouble = (std::numeric_limits<double>::min)();
 //compares two real numbers. Returns true if they are equal
@@ -33,7 +34,6 @@ struct Vector2D
 
     Vector2D() :x(0.0), y(0.0) {}
     Vector2D(double a, double b) :x(a), y(b) {}
-    Vector2D(XMFLOAT3 pos) :x(pos.x), y(pos.y) {}
 
     //sets x and y to zero
     void Zero() { x = 0.0; y = 0.0; }
@@ -90,13 +90,13 @@ struct Vector2D
         return *this;
     }
 
-    const Vector2D& operator*(const Vector2D& rhs)
+    /*const Vector2D& operator*(const Vector2D& rhs)
     {
         x *= rhs.x;
         y *= rhs.y;
 
         return *this;
-    }
+    }*/
 
     const Vector2D& operator*=(const Vector2D& rhs)
     {
@@ -142,8 +142,6 @@ inline Vector2D operator+(const Vector2D& lhs, const Vector2D& rhs);
 inline Vector2D operator/(const Vector2D& lhs, double val);
 std::ostream& operator<<(std::ostream& os, const Vector2D& rhs);
 std::ifstream& operator>>(std::ifstream& is, Vector2D& lhs);
-
-inline Vector2D operator-(const Vector2D& lhs, const XMFLOAT3& rhs);
 
 
 //------------------------------------------------------------------------member functions
@@ -316,15 +314,6 @@ inline double Vec2DDistanceSq(const Vector2D& v1, const Vector2D& v2)
     return ySeparation * ySeparation + xSeparation * xSeparation;
 }
 
-inline double Vec2DDistanceSq(const XMFLOAT3& v1, const Vector2D& v2)
-{
-
-    double ySeparation = v2.y - v1.y;
-    double xSeparation = v2.x - v1.x;
-
-    return ySeparation * ySeparation + xSeparation * xSeparation;
-}
-
 inline double Vec2DLength(const Vector2D& v)
 {
     return sqrt(v.x * v.x + v.y * v.y);
@@ -411,13 +400,15 @@ inline Vector2D operator/(const Vector2D& lhs, double val)
     return result;
 }
 
-// overload the - operator
-inline Vector2D operator-(const Vector2D& lhs, const XMFLOAT3& rhs)
+inline void WrapAround( Vector2D& pos, int MaxX, int MaxY )
 {
-    Vector2D result(lhs);
-    result.x -= rhs.x;
-    result.y -= rhs.y;
-    return result;
+    if ( pos.x > MaxX ) { pos.x = 0.0; }
+
+    if ( pos.x < 0 ) { pos.x = ( double )MaxX; }
+
+    if ( pos.y < 0 ) { pos.y = ( double )MaxY; }
+
+    if ( pos.y > MaxY ) { pos.y = 0.0; }
 }
 
 #endif

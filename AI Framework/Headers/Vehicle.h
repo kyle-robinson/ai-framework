@@ -2,32 +2,35 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 
-#include "DrawableGameObject.h"
-#include "Vector2D.h"
+//#include "AIManager.h"
+#include "MovingEntity.h"
+//#include "SteeringBehaviour.h"
+
+class AIManager;
+class SteeringBehaviour;
 
 #define MAX_SPEED 300
 
-class Vehicle : public DrawableGameObject
+class Vehicle : public MovingEntity
 {
 public:
-	virtual HRESULT initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, const std::wstring& texturePath );
-	virtual void update( const float deltaTime );
-
-	void setMaxSpeed( const float maxSpeed ) noexcept { m_maxSpeed = maxSpeed; }
-	void setCurrentSpeed( const float speed ); // a ratio: a value between 0 and 1 (1 being max speed)
-	void setPositionTo( Vector2D positionTo ); // a position to move to
-	void setVehiclePosition( Vector2D position ); // the current position - this resets positionTo
-
-	float getMaxSpeed() const noexcept { return m_maxSpeed; };
-	float getCurrentSpeed() const noexcept { return m_currentSpeed; };
-protected:
-	float m_maxSpeed;
-	float m_currentSpeed;
-	
-	Vector2D m_currentPosition;
-	Vector2D m_startPosition;
-	Vector2D m_positionTo;
-	Vector2D m_lastPosition;
+	Vehicle(
+		AIManager* aiManager,
+		Vector2D position,
+		double rotation,
+		Vector2D velocity,
+		double mass,
+		double maxForce,
+		double maxSpeed,
+		double maxTurnRate
+	);
+	virtual HRESULT InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, const std::wstring& texturePath );
+	virtual void Update( const float deltaTime );
+	AIManager* const World() const noexcept { return m_pWorld; }
+	SteeringBehaviour* const Steering() const noexcept { return m_pSteering; }
+private:
+	AIManager* m_pWorld;
+	SteeringBehaviour* m_pSteering;
 };
 
 #endif

@@ -25,19 +25,19 @@ HRESULT	Waypoint::initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, con
 		m_isOnTrack = true;
 		if ( std::find( vecCheckpoint.begin(), vecCheckpoint.end(), index ) != vecCheckpoint.end() )
 		{
-			setTextureName( L"Resources\\Textures\\yellow.dds" );
+			SetTextureName( L"Resources\\Textures\\yellow.dds" );
 			m_isCheckpoint = true;
 		}
 		else
 		{
-			setTextureName( L"Resources\\Textures\\red.dds" );
+			SetTextureName( L"Resources\\Textures\\red.dds" );
 		}
 	}
 	else {
 		m_isOnTrack = false;
 		float s = 10;
-		m_scale = { s, s, s };
-		setTextureName( L"Resources\\Textures\\blue.dds" );
+		m_scale = { s, s };
+		SetTextureName( L"Resources\\Textures\\blue.dds" );
 	}
 
 	HRESULT hr = DrawableGameObject::initMesh( pd3dDevice );

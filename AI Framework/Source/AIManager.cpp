@@ -2,7 +2,7 @@
 #include "PathFinder.h"
 #include "ErrorLogger.h"
 #include "PickupItem.h"
-#include "Vehicle.h"
+#include "SteeringBehaviour.h"
 #include <sstream>
 #include "main.h"
 
@@ -42,37 +42,41 @@ vecWaypoints AIManager::GetNeighbours( const int x, const int y )
     return neighbours;
 }
 
-HRESULT AIManager::initialise( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, UINT width, UINT height )
+HRESULT AIManager::Initialise( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, UINT width, UINT height )
 {
     this->width = width;
     this->height = height;
     
     // create a pickup item ----------------------------------------------
-    PickupItem* pPickup = new PickupItem();
-    HRESULT hr = pPickup->initMesh( pd3dDevice );
-    m_pickups.push_back( pPickup );
+    //PickupItem* pPickup = new PickupItem();
+    //HRESULT hr = pPickup->initMesh( pd3dDevice );
+    //m_pickups.push_back( pPickup );
 
     // create the vehicle ------------------------------------------------
-    float xPos = 0;
-    float yPos = 0;
+    double xPos = 0.0;
+    double yPos = 0.0;
 
-    m_pCar = new Vehicle();
-    hr = m_pCar->initMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_blue.dds" );
-    m_pCar->setPosition( XMFLOAT3( xPos, yPos, 0.0f ) );
-    if ( FAILED( hr ) ) return hr;
+    m_pCar = new Vehicle( this, { xPos, yPos }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 200.0 );
+    HRESULT hr = m_pCar->InitMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_blue.dds" );
+    m_pCar->Steering()->ArriveOn();
 
-    m_pCar2 = new Vehicle();
-    hr = m_pCar2->initMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_red.dds" );
-    m_pCar2->setPositionTo( XMFLOAT3( width / 2, 0.0f, 0 ) );
-    if ( FAILED( hr ) ) return hr;
+    //m_pCar = new Vehicle();
+    //hr = m_pCar->initMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_blue.dds" );
+    //m_pCar->setPosition( XMFLOAT3( xPos, yPos, 0.0f ) );
+    //if ( FAILED( hr ) ) return hr;
+
+    //m_pCar2 = new Vehicle();
+    //hr = m_pCar2->initMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_red.dds" );
+    //m_pCar2->setPositionTo( XMFLOAT3( width / 2, 0.0f, 0 ) );
+    //if ( FAILED( hr ) ) return hr;
 
     // create the waypoints
-    float xGap = SCREEN_WIDTH / WAYPOINT_RESOLUTION;
-    float yGap = SCREEN_HEIGHT / WAYPOINT_RESOLUTION;
-    float xStart = -( SCREEN_WIDTH / 2 ) + ( xGap / 2 );
-    float yStart = -( SCREEN_HEIGHT / 2 ) + ( yGap / 2 );
+    //float xGap = SCREEN_WIDTH / WAYPOINT_RESOLUTION;
+    //float yGap = SCREEN_HEIGHT / WAYPOINT_RESOLUTION;
+    //float xStart = -( SCREEN_WIDTH / 2 ) + ( xGap / 2 );
+    //float yStart = -( SCREEN_HEIGHT / 2 ) + ( yGap / 2 );
 
-    uint32_t index = 0;
+    /*uint32_t index = 0;
     for ( uint32_t j = 0; j < WAYPOINT_RESOLUTION; j++ )
     {
         for ( uint32_t i = 0; i < WAYPOINT_RESOLUTION; i++ )
@@ -82,26 +86,28 @@ HRESULT AIManager::initialise( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, 
             wp->setPosition( { xStart + ( xGap * i ), yStart + ( yGap * j ), 0 } );
             m_waypoints.push_back( wp );
         }
-    }
+    }*/
 
-    return hr;
+    return S_OK;
 }
 
-void AIManager::update( const float fDeltaTime )
+void AIManager::Update( const float fDeltaTime )
 {
+    if ( m_paused ) return;
+    
     // waypoints
-    for ( uint32_t i = 0; i < m_waypoints.size(); i++ )
-    {
-        m_waypoints[i]->update( fDeltaTime );
-        AddItemToDrawList( m_waypoints[i] ); // if you comment this in, it will display the waypoints
-    }
+    //for ( uint32_t i = 0; i < m_waypoints.size(); i++ )
+    //{
+    //    m_waypoints[i]->update( fDeltaTime );
+    //    AddItemToDrawList( m_waypoints[i] ); // if you comment this in, it will display the waypoints
+    //}
 
-    AddItemToDrawList( GetWaypoint( 9, 1 ) );
-    AddItemToDrawList( GetWaypoint( 5, 1 ) );
+    //AddItemToDrawList( GetWaypoint( 9, 1 ) );
+    //AddItemToDrawList( GetWaypoint( 5, 1 ) );
 
-    vecWaypoints neighbours = GetNeighbours( 19, 10 );
-    for ( uint32_t i = 0; i < neighbours.size(); i++ )
-        AddItemToDrawList( neighbours[i] );
+    //vecWaypoints neighbours = GetNeighbours( 19, 10 );
+    //for ( uint32_t i = 0; i < neighbours.size(); i++ )
+    //    AddItemToDrawList( neighbours[i] );
 
     // pickups
     for ( uint32_t i = 0; i < m_pickups.size(); i++ )
@@ -111,9 +117,9 @@ void AIManager::update( const float fDeltaTime )
     }
 
     // cars
-    checkWallWrapping( m_pCar );
-    m_pCar->update( fDeltaTime );
-    checkForCollisions( m_pCar );
+    //checkWallWrapping( m_pCar );
+    m_pCar->Update( fDeltaTime );
+    //checkForCollisions( m_pCar );
     AddItemToDrawList( m_pCar );
 
     //checkWallWrapping( m_pCar2 );
@@ -123,7 +129,7 @@ void AIManager::update( const float fDeltaTime )
     //AddItemToDrawList( m_pCar2 );
 }
 
-void AIManager::LeftMouseUp( const int x, const int y )
+/*void AIManager::LeftMouseUp( const int x, const int y )
 {
     //m_pCar->setPositionTo( Vector2D( x, y ) );
 
@@ -143,13 +149,13 @@ void AIManager::RightMouseUp( const int x, const int y )
     static int count = 0;
     if( count < path.size() )
         m_pCar->setPositionTo( path[count++] );
-}
+}*/
 
-void AIManager::keyPress( WPARAM param )
+void AIManager::HandleKeyPresses( WPARAM param )
 {
     switch ( param )
     {
-        case VK_NUMPAD0:
+        /*case VK_NUMPAD0:
         {
             OutputDebugStringA( "0 pressed \n" );
             break;
@@ -193,13 +199,17 @@ void AIManager::keyPress( WPARAM param )
             // arrive at the red car
             m_pCar->setPositionTo( Arrive( *m_pCar2->getPosition(), slow ) );
             break;
-        }
+        }*/
+    case 'P':
+        TogglePause();
+        break;
+
         default:
             break;
     }
 }
 
-void AIManager::checkWallWrapping( Vehicle* car )
+/*void AIManager::checkWallWrapping( Vehicle* car )
 {
     int offset = 10.0f;
     int xBound = width / 2;
@@ -213,7 +223,7 @@ void AIManager::checkWallWrapping( Vehicle* car )
         car->setPosition( XMFLOAT3( car->getPosition()->x, yBound, car->getPosition()->z ) );
     else if ( car->getPosition()->y > yBound - offset )
         car->setPosition( XMFLOAT3( car->getPosition()->x, -yBound, car->getPosition()->z ) );
-}
+}*/
 
 bool AIManager::checkForCollisions( Vehicle* car )
 {
@@ -256,7 +266,7 @@ bool AIManager::checkForCollisions( Vehicle* car )
     return false;
 }
 
-Vector2D AIManager::Flee( Vector2D TargetPos )
+/*Vector2D AIManager::Flee( Vector2D TargetPos )
 {
     const float max_distance = 400.0f;
     Vector2D distToTarget( *m_pCar->getPosition() - TargetPos );
@@ -293,4 +303,4 @@ void AIManager::Wander( Vehicle* car )
     {
         car->setPositionTo( XMFLOAT3( xBound, car->getPosition()->y, car->getPosition()->z ) );
     }
-}
+}*/

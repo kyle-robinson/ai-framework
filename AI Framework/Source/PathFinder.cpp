@@ -1,9 +1,8 @@
 #include "PathFinder.h"
-#include "Vector2D.h"
 
 PathFinder::PathFinder()
 {
-	SetEdgeCosts();
+	//SetEdgeCosts();
 }
 
 PathFinder::~PathFinder()
@@ -13,7 +12,7 @@ PathFinder::~PathFinder()
 	CLOSED_List.clear();
 }
 
-std::vector<Vector2D> PathFinder::GetPathBetween( Vector2D startPosition, Vector2D endPosition )
+/*std::vector<Vector2D> PathFinder::GetPathBetween( Vector2D startPosition, Vector2D endPosition )
 {
 	OPEN_List.clear();
 	CLOSED_List.clear();
@@ -151,4 +150,4 @@ double PathFinder::GetHeuristicCost( Vector2D pos1, Vector2D pos2 )
 {
 	Vector2D vecBetweenPoints = pos2 - pos1;
 	return vecBetweenPoints.Length();
-}
+}*/

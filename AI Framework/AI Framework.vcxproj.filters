@@ -72,6 +72,9 @@
     <ClCompile Include="Source\PathFinder.cpp">
       <Filter>Source\AI</Filter>
     </ClCompile>
+    <ClCompile Include="Source\SteeringBehaviour.cpp">
+      <Filter>Source\AI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\structures.h">
@@ -115,6 +118,18 @@
     </ClInclude>
     <ClInclude Include="Headers\Waypoint.h">
       <Filter>Headers\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\SteeringBehaviour.h">
+      <Filter>Headers\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\C2DMatrix.h">
+      <Filter>Headers\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Utility.h">
+      <Filter>Headers\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\MovingEntity.h">
+      <Filter>Headers\Entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

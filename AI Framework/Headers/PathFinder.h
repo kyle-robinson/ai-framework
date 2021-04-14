@@ -40,16 +40,16 @@ class PathFinder
 public:
 	PathFinder();
 	~PathFinder();
-	std::vector<Vector2D> GetPathBetween( Vector2D startPosition, Vector2D endPosition );
+	//std::vector<Vector2D> GetPathBetween( Vector2D startPosition, Vector2D endPosition );
 private:
-	void SetEdgeCosts();
+	/*void SetEdgeCosts();
 	Waypoint* GetNearestWaypointToPosition( Vector2D position );
 	
 	double GetCostBetweenWaypoints( Waypoint* from, Waypoint* to );
 	std::vector<Vector2D> ConstructPath( AStarNode* targetNode, Vector2D endPos );
 
 	bool IsInList( std::vector<AStarNode*> listToCheck, Waypoint* waypointToCheck );
-	double GetHeuristicCost( Vector2D pos1, Vector2D pos2 );
+	double GetHeuristicCost( Vector2D pos1, Vector2D pos2 );*/
 private:
 	AIManager aiManager;
 	std::vector<EdgeCost*> EDGECOST_List;
