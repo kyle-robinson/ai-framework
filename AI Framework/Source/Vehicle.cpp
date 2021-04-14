@@ -60,8 +60,12 @@ void Vehicle::Update( const float deltaTime )
 		m_vSide = m_vHeading.Perp();
 	}
 
-	// treat the screen as a toroid
-	WrapAround( m_position, 1024, 768 );
+	// handle vehicle screen wrapping
+	RECT rect;
+	GetClientRect( m_pWorld->GetHWND(), &rect );
+	int cxClient = rect.right;
+	int cyClient = rect.bottom;
+	WrapAround( m_position, cxClient / 2, cyClient / 2 );
 
 	// update the vehicle's rotation
 	Vector2D diff;

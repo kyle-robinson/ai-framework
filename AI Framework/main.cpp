@@ -399,7 +399,7 @@ HRESULT InitDevice()
     }
 
     // initialise the AI / SceneManager
-    g_AIManager.Initialise( g_pd3dDevice, SCREEN_WIDTH, SCREEN_HEIGHT );
+    g_AIManager.Initialise( g_hWnd, g_pd3dDevice, SCREEN_WIDTH, SCREEN_HEIGHT );
 
     return S_OK;
 }
@@ -561,6 +561,9 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam 
     case WM_KEYDOWN:
         //g_AIManager.keyPress( wParam );
         break;
+
+    case WM_KEYUP:
+        g_AIManager.HandleKeyPresses( wParam );
 
     default:
         return DefWindowProc( hWnd, message, wParam, lParam );

@@ -42,8 +42,9 @@ vecWaypoints AIManager::GetNeighbours( const int x, const int y )
     return neighbours;
 }
 
-HRESULT AIManager::Initialise( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, UINT width, UINT height )
+HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, UINT width, UINT height )
 {
+    this->hWnd = hWnd;
     this->width = width;
     this->height = height;
     
@@ -60,18 +61,18 @@ HRESULT AIManager::Initialise( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, 
     HRESULT hr = m_pCar->InitMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_blue.dds" );
     m_pCar->Steering()->ArriveOn();
 
-    //m_pCar2 = new Vehicle();
-    //hr = m_pCar2->initMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_red.dds" );
-    //m_pCar2->setPositionTo( XMFLOAT3( width / 2, 0.0f, 0 ) );
-    //if ( FAILED( hr ) ) return hr;
+    /*m_pCar2 = new Vehicle();
+    hr = m_pCar2->initMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_red.dds" );
+    m_pCar2->setPositionTo( XMFLOAT3( width / 2, 0.0f, 0 ) );
+    if ( FAILED( hr ) ) return hr;
 
     // create the waypoints
-    //float xGap = SCREEN_WIDTH / WAYPOINT_RESOLUTION;
-    //float yGap = SCREEN_HEIGHT / WAYPOINT_RESOLUTION;
-    //float xStart = -( SCREEN_WIDTH / 2 ) + ( xGap / 2 );
-    //float yStart = -( SCREEN_HEIGHT / 2 ) + ( yGap / 2 );
+    float xGap = SCREEN_WIDTH / WAYPOINT_RESOLUTION;
+    float yGap = SCREEN_HEIGHT / WAYPOINT_RESOLUTION;
+    float xStart = -( SCREEN_WIDTH / 2 ) + ( xGap / 2 );
+    float yStart = -( SCREEN_HEIGHT / 2 ) + ( yGap / 2 );
 
-    /*uint32_t index = 0;
+    uint32_t index = 0;
     for ( uint32_t j = 0; j < WAYPOINT_RESOLUTION; j++ )
     {
         for ( uint32_t i = 0; i < WAYPOINT_RESOLUTION; i++ )
@@ -88,39 +89,33 @@ HRESULT AIManager::Initialise( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, 
 
 void AIManager::Update( const float fDeltaTime )
 {
-    if ( m_paused ) return;
-    
     // waypoints
-    //for ( uint32_t i = 0; i < m_waypoints.size(); i++ )
-    //{
-    //    m_waypoints[i]->update( fDeltaTime );
-    //    AddItemToDrawList( m_waypoints[i] ); // if you comment this in, it will display the waypoints
-    //}
+    /*for ( uint32_t i = 0; i < m_waypoints.size(); i++ )
+    {
+        m_waypoints[i]->update( fDeltaTime );
+        AddItemToDrawList( m_waypoints[i] ); // if you comment this in, it will display the waypoints
+    }
 
-    //AddItemToDrawList( GetWaypoint( 9, 1 ) );
-    //AddItemToDrawList( GetWaypoint( 5, 1 ) );
+    AddItemToDrawList( GetWaypoint( 9, 1 ) );
+    AddItemToDrawList( GetWaypoint( 5, 1 ) );
 
     //vecWaypoints neighbours = GetNeighbours( 19, 10 );
-    //for ( uint32_t i = 0; i < neighbours.size(); i++ )
-    //    AddItemToDrawList( neighbours[i] );
+    for ( uint32_t i = 0; i < neighbours.size(); i++ )
+        AddItemToDrawList( neighbours[i] );
 
     // pickups
-    //for ( uint32_t i = 0; i < m_pickups.size(); i++ )
-    //{
-    //    m_pickups[i]->update( fDeltaTime );
-    //    AddItemToDrawList( m_pickups[i] );
-    //}
+    for ( uint32_t i = 0; i < m_pickups.size(); i++ )
+    {
+        m_pickups[i]->update( fDeltaTime );
+        AddItemToDrawList( m_pickups[i] );
+    }*/
 
     // cars
-    //checkWallWrapping( m_pCar );
+    //if ( !m_paused )
     m_pCar->Update( fDeltaTime );
-    //checkForCollisions( m_pCar );
     AddItemToDrawList( m_pCar );
 
-    //checkWallWrapping( m_pCar2 );
     //m_pCar2->update( fDeltaTime );
-    //Wander( m_pCar2 );
-    //checkForCollisions( m_pCar2 );
     //AddItemToDrawList( m_pCar2 );
 }
 
@@ -198,27 +193,8 @@ void AIManager::HandleKeyPresses( WPARAM param )
     case 'P':
         TogglePause();
         break;
-
-        default:
-            break;
     }
 }
-
-/*void AIManager::checkWallWrapping( Vehicle* car )
-{
-    int offset = 10.0f;
-    int xBound = width / 2;
-    if ( car->getPosition()->x > xBound - offset )
-        car->setPosition( XMFLOAT3( -xBound, car->getPosition()->y, car->getPosition()->z ) );
-    else if ( car->getPosition()->x < -xBound + offset )
-        car->setPosition( XMFLOAT3( xBound, car->getPosition()->y, car->getPosition()->z ) );
-
-    int yBound = height / 2;
-    if ( car->getPosition()->y < -yBound + offset )
-        car->setPosition( XMFLOAT3( car->getPosition()->x, yBound, car->getPosition()->z ) );
-    else if ( car->getPosition()->y > yBound - offset )
-        car->setPosition( XMFLOAT3( car->getPosition()->x, -yBound, car->getPosition()->z ) );
-}*/
 
 bool AIManager::checkForCollisions( Vehicle* car )
 {
@@ -260,42 +236,3 @@ bool AIManager::checkForCollisions( Vehicle* car )
 
     return false;
 }
-
-/*Vector2D AIManager::Flee( Vector2D TargetPos )
-{
-    const float max_distance = 400.0f;
-    Vector2D distToTarget( *m_pCar->getPosition() - TargetPos );
-    Vector2D DesiredVelocity = Vec2DNormalize( distToTarget ) * max_distance;
-    return ( DesiredVelocity - *m_pCar->getDirection() );
-}
-
-Vector2D AIManager::Arrive( Vector2D TargetPos, Deceleration deceleration )
-{
-    Vector2D ToTarget = TargetPos - *m_pCar->getPosition();
-    double dist = ToTarget.Length();
-
-    if ( dist > 0 )
-    {
-        const double DecelerationTweaker = 0.3;
-        double speed = dist / ( static_cast<double>( deceleration ) * DecelerationTweaker );
-        speed = min( speed, m_pCar->getMaxSpeed() );
-
-        Vector2D DesiredVelocity = ToTarget * speed / dist;
-        return DesiredVelocity;
-    }
-
-    return Vector2D( 0, 0 );
-}
-
-void AIManager::Wander( Vehicle* car )
-{
-    int xBound = width / 2;
-    if ( car->getPosition()->x >= xBound )
-    {
-        car->setPositionTo( XMFLOAT3( -xBound, car->getPosition()->y, car->getPosition()->z ) );
-    }
-    else if ( car->getPosition()->x <= -xBound )
-    {
-        car->setPositionTo( XMFLOAT3( xBound, car->getPosition()->y, car->getPosition()->z ) );
-    }
-}*/

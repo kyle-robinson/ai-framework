@@ -5,7 +5,6 @@
 #include <vector>
 #include <memory>
 #include <string>
-//#include "Vector2D.h"
 #include "Vehicle.h"
 
 class Vehicle;

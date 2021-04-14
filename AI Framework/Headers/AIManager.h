@@ -8,7 +8,6 @@
 #include <d3dcompiler.h>
 #include <directxcolors.h>
 #include <DirectXCollision.h>
-//#include "Vector2D.h"
 #include "Vehicle.h"
 
 class PickupItem;
@@ -25,22 +24,23 @@ public:
 	vecWaypoints GetNeighbours( const int x, const int y );
 	vecWaypoints GetWaypoints() const noexcept { return m_waypoints; }
 
-	HRESULT Initialise( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, UINT width, UINT height );
+	HRESULT Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, UINT width, UINT height );
 	void Update( const float fDeltaTime );
 	void HandleKeyPresses( WPARAM param );
 	
 	Vector2D GetCrosshair() const noexcept { return m_crosshair; }
 	void SetCrosshair( const double x, const double y ) noexcept { m_crosshair = { x, y }; }
+
+	HWND GetHWND() const noexcept { return hWnd; }
+	int GetScreenX() const noexcept { return width; }
+	int GetScreenY() const noexcept { return height; }
 protected:
-	//void checkWallWrapping( Vehicle* car );
 	bool checkForCollisions( Vehicle* car );
-	//void Wander( Vehicle* car );
-	//Vector2D Flee( Vector2D TargetPos );
-	//Vector2D Arrive( Vector2D TargetPos, Deceleration deceleration );
 private:
 	void TogglePause() noexcept { m_paused = !m_paused; }
 	bool Paused() const noexcept { return m_paused; }
 
+	HWND hWnd;
 	UINT width;
 	UINT height;
 

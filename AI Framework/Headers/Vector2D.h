@@ -402,13 +402,10 @@ inline Vector2D operator/(const Vector2D& lhs, double val)
 
 inline void WrapAround( Vector2D& pos, int MaxX, int MaxY )
 {
-    if ( pos.x > MaxX ) { pos.x = 0.0; }
-
-    if ( pos.x < 0 ) { pos.x = ( double )MaxX; }
-
-    if ( pos.y < 0 ) { pos.y = ( double )MaxY; }
-
-    if ( pos.y > MaxY ) { pos.y = 0.0; }
+    if ( pos.x > MaxX ) { pos.x = -MaxX; }
+    if ( pos.x < -MaxX ) { pos.x = ( double )MaxX; }
+    if ( pos.y < -MaxY ) { pos.y = ( double )MaxY; }
+    if ( pos.y > MaxY ) { pos.y = -MaxY; }
 }
 
 #endif

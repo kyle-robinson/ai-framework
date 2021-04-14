@@ -28,7 +28,6 @@ public:
 		m_dMaxTurnRate( turnRate ),
 		m_dMaxForce( maxForce )
 	{ }
-	//virtual ~MovingEntity();
 
 	// speed
 	double GetMaxSpeed() const noexcept { return m_dMaxSpeed; }
@@ -58,26 +57,21 @@ public:
 	{
 		Vector2D toTarget = Vec2DNormalize( target - GetPosition() );
 
-		//first determine the angle between the heading vector and the target
+		// Get the angle between the heading and the target
 		double angle = acos( m_vHeading.Dot( toTarget ) );
 
-		//return true if the player is facing the target
+		// return true if the player is already facing the target
 		if ( angle < 0.00001 ) return true;
 
-		//clamp the amount to turn to the max turn rate
+		// clamp the amount to turn to the max turn rate
 		if ( angle > m_dMaxTurnRate ) angle = m_dMaxTurnRate;
 
-		//The next few lines use a rotation matrix to rotate the player's heading
-		//vector accordingly
+		// rotate the player's heading vector
 		C2DMatrix RotationMatrix;
-
-		//notice how the direction of rotation has to be determined when creating
-		//the rotation matrix
 		RotationMatrix.Rotate( angle * m_vHeading.Sign( toTarget ) );
 		RotationMatrix.TransformVector2Ds( m_vHeading );
 		RotationMatrix.TransformVector2Ds( m_vVelocity );
 
-		//finally recreate m_vSide
 		m_vSide = m_vHeading.Perp();
 
 		return false;

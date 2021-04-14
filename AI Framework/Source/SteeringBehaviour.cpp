@@ -1,5 +1,4 @@
 #include "SteeringBehaviour.h"
-//#include "Vehicle.h"
 #include "AIManager.h"
 
 SteeringBehaviour::SteeringBehaviour( Vehicle* vehicle ) :

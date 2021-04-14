@@ -32,12 +32,10 @@ public:
 
 	void SetPosition( Vector2D position ) noexcept { m_position = position; }
 	Vector2D GetPosition() const noexcept { return m_position; }
-	//Vector2D GetDirection() const noexcept { return m_direction; }
 
 	double GetBoundingRadius() const noexcept { return m_dBoundingRadius; }
 	void SetBoundingRadius( double boundingRadius ) noexcept { m_dBoundingRadius = boundingRadius; }
 protected:
-	//void SetDirection( XMFLOAT3 direction );
 	void SetTextureName( std::wstring texName ) noexcept { m_textureName = texName; }
 
 	// helper functions
