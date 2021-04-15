@@ -32,7 +32,8 @@ SteeringBehaviour::SteeringBehaviour( Vehicle* vehicle ) :
     m_dWeightWander( 1.0 ),
     m_dWanderDistance( 2.0 ),
     m_dWanderJitter( 80.0 ),
-    m_dWanderRadius( 1.2 )
+    m_dWanderRadius( 1.2 ),
+    m_dWeightFlee( 1.0 )
 {
     double theta = RandFloat() * TwoPi;
     m_vWanderTarget = Vector2D( m_dWanderRadius * cos( theta ), m_dWanderRadius * sin( theta ) );
@@ -43,6 +44,13 @@ Vector2D SteeringBehaviour::Calculate()
     //reset the steering force
     m_vSteeringForce.Zero();
     Vector2D force;
+
+    if ( On( FLEE ) )
+    {
+        force = Flee( m_pVehicle->World()->GetCrosshair() ) * m_dWeightFlee;
+        if ( !AccumulateForce( m_vSteeringForce, force ) )
+            return m_vSteeringForce;
+    }
 
     if ( On( ARRIVE ) )
     {
@@ -136,6 +144,14 @@ Vector2D SteeringBehaviour::Arrive( Vector2D targetPos, Deceleration deceleratio
     }
 
     return Vector2D( 0, 0 );
+}
+
+Vector2D SteeringBehaviour::Flee( Vector2D TargetPos )
+{
+    Vector2D DesiredVelocity = Vec2DNormalize( m_pVehicle->GetPosition() - TargetPos )
+        * m_pVehicle->GetMaxSpeed();
+
+    return ( DesiredVelocity - m_pVehicle->GetVelocity() );
 }
 
 Vector2D SteeringBehaviour::Wander()
