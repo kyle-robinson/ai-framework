@@ -33,6 +33,10 @@ public:
 	void SetPosition( Vector2D position ) noexcept { m_position = position; }
 	Vector2D GetPosition() const noexcept { return m_position; }
 
+	void Tag() { m_bTag = true; }
+	void UnTag() { m_bTag = false; }
+	bool IsTagged()const { return m_bTag; }
+
 	double GetBoundingRadius() const noexcept { return m_dBoundingRadius; }
 	void SetBoundingRadius( double boundingRadius ) noexcept { m_dBoundingRadius = boundingRadius; }
 protected:
@@ -48,7 +52,6 @@ protected:
 
 	Vector2D m_scale;
 	Vector2D m_position;
-	//Vector2D m_direction;
 	float m_radianRotation;
 	double m_dBoundingRadius;
 private:
@@ -57,6 +60,7 @@ private:
 	ID3D11ShaderResourceView* m_pTextureResourceView;
 	ID3D11SamplerState* m_pSamplerLinear;
 	
+	bool m_bTag;
 	XMFLOAT4X4 m_world;
 	std::wstring m_textureName;	
 };

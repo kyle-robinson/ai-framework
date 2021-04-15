@@ -7,6 +7,39 @@
 #include "main.h"
 #include <imgui/imgui.h>
 
+inline bool TwoCirclesOverlapped( Vector2D c1, double r1,
+    Vector2D c2, double r2 )
+{
+    double DistBetweenCenters = sqrt( ( c1.x - c2.x ) * ( c1.x - c2.x ) +
+        ( c1.y - c2.y ) * ( c1.y - c2.y ) );
+
+    if ( ( DistBetweenCenters < ( r1 + r2 ) ) || ( DistBetweenCenters < fabs( r1 - r2 ) ) )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+template <class T, class conT>
+bool Overlapped( const T* ob, const conT& conOb, double MinDistBetweenObstacles = 40.0 )
+{
+    typename conT::const_iterator it;
+
+    for ( it = conOb.begin(); it != conOb.end(); ++it )
+    {
+        if ( TwoCirclesOverlapped( ob->GetPosition(),
+            ob->GetBoundingRadius() + MinDistBetweenObstacles,
+            ( *it )->GetPosition(),
+            ( *it )->GetBoundingRadius() ) )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 Waypoint* AIManager::GetWaypoint( const int x, const int y )
 {
     static bool runOnce = true;
@@ -48,25 +81,23 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> p
     this->hWnd = hWnd;
     this->width = width;
     this->height = height;
+    this->device = pd3dDevice;
     
     // create a pickup item ----------------------------------------------
     //PickupItem* pPickup = new PickupItem();
     //HRESULT hr = pPickup->initMesh( pd3dDevice );
     //m_pickups.push_back( pPickup );
 
-    // create the vehicle ------------------------------------------------
-    m_pCarBlue = new Vehicle( this, { 0.0, 0.0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 2.0 );
+    // create vehicles
+    m_pCarBlue = new Vehicle( this, { 0.0, 0.0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 20.0 );
     HRESULT hr = m_pCarBlue->InitMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_blue.dds" );
-    //m_pCarBlue->Steering()->ArriveOn();
-    //m_pCarBlue->Steering()->FleeOn();
-    //m_pCarBlue->Steering()->SeekOn();
     m_pCarBlue->Steering()->WanderOn();
 
-    m_pCarRed = new Vehicle( this, { 0.0, 0.0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 2.0 );
+    m_pCarRed = new Vehicle( this, { 0.0, 0.0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 20.0 );
     hr = m_pCarRed->InitMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_red.dds" );
     m_pCarRed->Steering()->PursuitOn( m_pCarBlue );
 
-    // create the waypoints
+    // create waypoints
     /*float xGap = SCREEN_WIDTH / WAYPOINT_RESOLUTION;
     float yGap = SCREEN_HEIGHT / WAYPOINT_RESOLUTION;
     float xStart = -( SCREEN_WIDTH / 2 ) + ( xGap / 2 );
@@ -85,6 +116,53 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> p
     }*/
 
     return hr;
+}
+
+void AIManager::CreateObstacles()
+{
+    int noOfObstacles = 7;
+    for ( int i = 0; i < noOfObstacles; ++i )
+    {
+        bool overlapped = true;
+        bool bOverlapped = true;
+
+        //keep creating tiddlywinks until we find one that doesn't overlap
+        //any others.Sometimes this can get into an endless loop because the
+        //obstacle has nowhere to fit. We test for this case and exit accordingly
+
+        int NumTrys = 0; int NumAllowableTrys = 2000;
+
+        while ( bOverlapped )
+        {
+            NumTrys++;
+
+            if ( NumTrys > NumAllowableTrys ) return;
+
+            int radius = RandInt( ( int )10, ( int )30 );
+
+            const int border = 10;
+            const int MinGapBetweenObstacles = 20;
+
+            Obstacle* ob = new Obstacle( RandInt( radius + border, width - radius - border ),
+                RandInt( radius + border, height - radius - 30 - border ),
+                radius );
+
+            HRESULT hr = ob->InitMesh( device.Get(), L"Resources\\Textures\\stone.dds" );
+            if ( FAILED( hr ) ) return;
+
+            if ( !Overlapped( ob, m_obstacles, MinGapBetweenObstacles ) )
+            {
+                //its not overlapped so we can add it
+                m_obstacles.push_back( ob );
+
+                bOverlapped = false;
+            }
+            else
+            {
+                delete ob;
+            }
+        }
+    }
 }
 
 void AIManager::Update( const float fDeltaTime )
@@ -114,10 +192,18 @@ void AIManager::Update( const float fDeltaTime )
     if ( !IsPaused() )
     {
         m_pCarBlue->Update( fDeltaTime );
-        m_pCarRed->Update( fDeltaTime );
+        if ( m_bEnableRedCar )
+            m_pCarRed->Update( fDeltaTime );
+        for ( uint32_t i = 0; i < m_obstacles.size(); i++ )
+            m_obstacles[i]->update( fDeltaTime );
     }
+
     AddItemToDrawList( m_pCarBlue );
-    AddItemToDrawList( m_pCarRed );
+    if ( m_bEnableRedCar )
+        AddItemToDrawList( m_pCarRed );
+
+    for ( uint32_t i = 0; i < m_obstacles.size(); i++ )
+        AddItemToDrawList( m_obstacles[i] );
 
     SpawnControlWindow();
 }
@@ -150,6 +236,20 @@ void AIManager::HandleKeyPresses( WPARAM param )
     {
     case 'P':
         TogglePause();
+        break;
+
+    case 'Y':
+        m_bShowObstacles = !m_bShowObstacles;
+        if ( !m_bShowObstacles )
+        {
+            m_obstacles.clear();
+            m_pCarBlue->Steering()->ObstacleAvoidanceOff();
+        }
+        else
+        {
+            CreateObstacles();
+            m_pCarBlue->Steering()->ObstacleAvoidanceOn();
+        }
         break;
     }
 }
@@ -197,10 +297,48 @@ bool AIManager::checkForCollisions( Vehicle* car )
 
 void AIManager::SpawnControlWindow()
 {
-    if ( ImGui::Begin( "Control Window", FALSE, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove ) )
+    if ( ImGui::Begin( "Steering", FALSE, ImGuiWindowFlags_AlwaysAutoResize ) )
     {
-        static float sliderVariable = 0.0f;
-        ImGui::SliderFloat( "Slider float", &sliderVariable, 0.0f, 1.0f );
+        // wander
+        static bool wanderBool = true;
+        ImGui::Checkbox( "Wander", &wanderBool );
+        wanderBool ? m_pCarBlue->Steering()->WanderOn() : m_pCarBlue->Steering()->WanderOff();
+
+        // arrive
+        static bool arriveBool = false;
+        ImGui::Checkbox( "Arrive", &arriveBool );
+        arriveBool ? m_pCarBlue->Steering()->ArriveOn() : m_pCarBlue->Steering()->ArriveOff();
+            
+        if ( m_pCarBlue->Steering()->IsArriveOn() )
+        {
+            ImGui::Text( "Deceleration" );
+
+            if ( ImGui::Button( "Fast" ) )
+                m_pCarBlue->Steering()->SetDeceleration( static_cast< SteeringBehaviour::Deceleration >( 3 ) );
+                
+            ImGui::SameLine();
+            if ( ImGui::Button( "Normal" ) )
+                m_pCarBlue->Steering()->SetDeceleration( static_cast< SteeringBehaviour::Deceleration >( 2 ) );
+                
+            ImGui::SameLine();
+            if ( ImGui::Button( "Slow" ) )
+                m_pCarBlue->Steering()->SetDeceleration( static_cast< SteeringBehaviour::Deceleration >( 1 ) );
+        }
+
+        // seek
+        static bool seekBool = false;
+        ImGui::Checkbox( "Seek", &seekBool );
+        seekBool ? m_pCarBlue->Steering()->SeekOn() : m_pCarBlue->Steering()->SeekOff();
+
+        // flee
+        static bool fleeBool = false;
+        ImGui::Checkbox( "Flee", &fleeBool );
+        fleeBool ? m_pCarBlue->Steering()->FleeOn() : m_pCarBlue->Steering()->FleeOff();
+
+        // pursuit
+        static bool pursuitBool = false;
+        ImGui::Checkbox( "Pursuit", &pursuitBool );
+        m_bEnableRedCar = pursuitBool;
     }
     ImGui::End();
 }

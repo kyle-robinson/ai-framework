@@ -22,6 +22,7 @@ private:
 		OBSTACLE	= 0x00010,
 		WANDER		= 0x00020
 	};
+public:
 	enum Deceleration
 	{
 		SLOW	= 3,
@@ -38,7 +39,9 @@ private:
 	double m_dWanderJitter;
 	double m_dWanderRadius;
 	double m_dWanderDistance;
+	double m_dDBoxLength;
 
+	double m_dWeightObstacleAvoidance;
 	double m_dWeightPursuit;
 	double m_dWeightWander;
 	double m_dWeightArrive;
@@ -47,6 +50,7 @@ private:
 
 	// behaviours
 	bool AccumulateForce( Vector2D& RunningTot, Vector2D ForceToAdd );
+	Vector2D ObstacleAvoidance( const std::vector<DrawableGameObject*>& obstacles );
 	Vector2D Arrive( Vector2D TargetPos, Deceleration deceleration );
 	Vector2D Pursuit( const Vehicle* agent );
 	Vector2D Flee( Vector2D TargetPos );
@@ -63,6 +67,12 @@ public:
 	double ForwardComponent();
 	double SideComponent();
 	Vector2D Force() const noexcept { return m_vSteeringForce; }
+	void SetDeceleration( Deceleration deceleration ) { m_deceleration = deceleration; }
+
+	// obstacle avoidance
+	void ObstacleAvoidanceOn() { m_iFlags |= OBSTACLE; }
+	void ObstacleAvoidanceOff() { if ( On( OBSTACLE ) ) m_iFlags ^= OBSTACLE; }
+	bool IsObstacleAvoidanceOn() { return On( OBSTACLE ); }
 
 	// arrive
 	void ArriveOn() { m_iFlags |= ARRIVE; }

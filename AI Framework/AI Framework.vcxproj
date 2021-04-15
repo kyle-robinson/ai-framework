@@ -62,6 +62,7 @@
     <ClInclude Include="Headers\ErrorLogger.h" />
     <ClInclude Include="Headers\ImGuiManager.h" />
     <ClInclude Include="Headers\MovingEntity.h" />
+    <ClInclude Include="Headers\Obstacle.h" />
     <ClInclude Include="Headers\PathFinder.h" />
     <ClInclude Include="Headers\PickupItem.h" />
     <ClInclude Include="Headers\SteeringBehaviour.h" />

@@ -4,7 +4,8 @@ DrawableGameObject::DrawableGameObject( Vector2D position, double radius ) :
 	m_position( position ),
 	m_dBoundingRadius( radius ),
 	m_scale( { 10.0f, 10.0f } ),
-	m_radianRotation( 0.0f )
+	m_radianRotation( 0.0f ),
+	m_bTag( false )
 {
 	m_pVertexBuffer = nullptr;
 	m_pIndexBuffer = nullptr;
