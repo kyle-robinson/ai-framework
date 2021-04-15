@@ -26,13 +26,14 @@ inline Vector2D PointToWorldSpace( const Vector2D& point,
 
 SteeringBehaviour::SteeringBehaviour( Vehicle* vehicle ) :
 	m_pVehicle( vehicle ),
+    m_pTargetAgent( nullptr ),
 	m_iFlags( 0 ),
 	m_dWeightArrive( 1.0 ),
 	m_deceleration( NORMAL ),
-    m_dWeightWander( 1.0 ),
-    m_dWanderDistance( 2.0 ),
-    m_dWanderJitter( 80.0 ),
-    m_dWanderRadius( 1.2 ),
+    m_dWeightWander( 10.0 ),
+    m_dWanderDistance( 10.0 ),
+    m_dWanderJitter( 200.0 ),
+    m_dWanderRadius( 10.0 ),
     m_dWeightFlee( 1.0 ),
     m_dWeightSeek( 1.0 ),
     m_dWeightPursuit( 1.0 )

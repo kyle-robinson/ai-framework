@@ -15,20 +15,10 @@
 #include "ErrorLogger.h"
 #include "ImGuiManager.h"
 
-//#define PICK_MODE // Ignore this, it is not needed, but might be useful for debugging
-
-#ifdef PICK_MODE
-void pick( int mousex, int mousey );
-#endif
-
 //--------------------------------------------------------------------------------------
 // eye position
 //--------------------------------------------------------------------------------------
-#ifdef PICK_MODE
-DirectX::XMFLOAT4 g_EyePosition( 0, 0, -400, 1 );
-#else
 DirectX::XMFLOAT4 g_EyePosition( 0, 0, -200, 1 );
-#endif
 
 //--------------------------------------------------------------------------------------
 // Forward declarations
@@ -40,7 +30,6 @@ HRESULT InitWorld( int width, int height );
 void CleanupDevice();
 LRESULT CALLBACK WndProc( HWND, UINT, WPARAM, LPARAM );
 void Render();
-void OutputValue( float f, std::string name );
 
 //--------------------------------------------------------------------------------------
 // Global Variables
@@ -493,11 +482,7 @@ HRESULT InitWorld( int width, int height )
 	g_View = XMMatrixLookAtLH( Eye, At, Up );
 
 	// Initialize the projection matrix
-#ifdef PICK_MODE
-    g_Projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, static_cast<FLOAT>( width ) / static_cast<FLOAT>( height ), 0.01f, 1000.0f );
-#else
     g_Projection = XMMatrixOrthographicLH( static_cast<float>( width ), static_cast<float>( height ), 0.01f, 1000.0f );
-#endif
 
 	return S_OK;
 }
@@ -507,8 +492,6 @@ HRESULT InitWorld( int width, int height )
 //--------------------------------------------------------------------------------------
 void CleanupDevice()
 {
-    if( g_pImmediateContext ) g_pImmediateContext->ClearState();
-
     if( g_pConstantBuffer ) g_pConstantBuffer->Release();
     if( g_pVertexShader ) g_pVertexShader->Release();
     if( g_pPixelShader ) g_pPixelShader->Release();
@@ -538,9 +521,6 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam 
     {
         int xPos = GET_X_LPARAM( lParam );
         int yPos = GET_Y_LPARAM( lParam );
-#ifdef PICK_MODE
-        pick( xPos, yPos );
-#endif
         
         // modify the x and y pos to match the scene coordinates
         xPos -= SCREEN_WIDTH / 2;
@@ -654,65 +634,3 @@ void Render()
     imgui.EndRender();
     g_pSwapChain->Present( 0, 0 );
 }
-
-#ifdef PICK_MODE
-void OutputValue( float f, string name )
-{
-	char sz[1024] = { 0 };
-	sprintf_s( sz, "%s: %f\n", name.c_str(), f );
-	OutputDebugStringA( sz );
-}
-
-void pick( int mouse_x, int mouse_y )
-{
-    XMMATRIX invView = XMMatrixInverse( nullptr, g_View );
-    XMMATRIX invProj = XMMatrixInverse( nullptr, g_Projection );
-
-    float fNormalisedScreenCoordinates[3];
-    fNormalisedScreenCoordinates[0] = ( 2.0f * mouse_x ) / g_viewWidth - 1.0f;
-    fNormalisedScreenCoordinates[1] = 1.0f - ( 2.0f * mouse_y ) / g_viewHeight;
-
-    XMVECTOR eyePos;
-    XMVECTOR dummy;
-    XMMatrixDecompose( &dummy, &dummy, &eyePos, invView );
-
-    XMVECTOR rayorigin = XMVectorSet( fNormalisedScreenCoordinates[0], fNormalisedScreenCoordinates[1], 0, 0 );
-    rayorigin = XMVector3Transform( rayorigin, invProj );
-    rayorigin = XMVector3Transform( rayorigin, invView );
-    XMVECTOR rayDir = rayorigin - eyePos;
-    rayDir = XMVector3Normalize( rayDir );
-
-    XMVECTOR cubePos;
-    for ( uint32_t i = 0; i < g_waypoints.size(); i++ )
-    {
-        XMMatrixDecompose( &dummy, &dummy, &cubePos,
-            XMLoadFloat4x4( g_waypoints[i]->getTransform() )
-        );
-
-        char buffer[1024];
-        sprintf_s( buffer, "Origin %f, %f, %f   Ray %f, %f, %f\n Cube %f %f %f \n\n\n\n",
-            XMVectorGetByIndex( rayorigin, 0 ), XMVectorGetByIndex( rayorigin, 1 ), XMVectorGetByIndex( rayorigin, 2 ),
-            XMVectorGetByIndex( rayDir, 0 ), XMVectorGetByIndex( rayDir, 1 ), XMVectorGetByIndex( rayDir, 2 ),
-            XMVectorGetByIndex( cubePos, 0 ), XMVectorGetByIndex( cubePos, 1 ), XMVectorGetByIndex( cubePos, 2 ) );
-        OutputDebugStringA( buffer );
-
-        BoundingSphere bs;
-        XMStoreFloat3( &bs.Center, cubePos );
-        bs.Radius = 10;
-
-        float distance = 0;
-        if ( bs.Intersects( rayorigin, rayDir, distance ) )
-        {
-            char buffer[1024];
-            sprintf_s( buffer, "%d,", i );
-            OutputDebugStringA( buffer );
-        }
-        else
-        {
-            //OutputDebugString( L"A: no hit\n" );
-            //std::cout << "A: no hit" << std::endl;
-        }
-    }
-}
-
-#endif

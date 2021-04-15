@@ -55,14 +55,14 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> p
     //m_pickups.push_back( pPickup );
 
     // create the vehicle ------------------------------------------------
-    m_pCarBlue = new Vehicle( this, { 0.0, 0.0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 200.0 );
+    m_pCarBlue = new Vehicle( this, { 0.0, 0.0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 2.0 );
     HRESULT hr = m_pCarBlue->InitMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_blue.dds" );
     //m_pCarBlue->Steering()->ArriveOn();
     //m_pCarBlue->Steering()->FleeOn();
     //m_pCarBlue->Steering()->SeekOn();
     m_pCarBlue->Steering()->WanderOn();
 
-    m_pCarRed = new Vehicle( this, { 0.0, 50.0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 200.0 );
+    m_pCarRed = new Vehicle( this, { 0.0, 0.0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 2.0 );
     hr = m_pCarRed->InitMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_red.dds" );
     m_pCarRed->Steering()->PursuitOn( m_pCarBlue );
 

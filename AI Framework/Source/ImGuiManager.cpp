@@ -34,26 +34,6 @@ void ImGuiManager::EndRender() const noexcept
     ImGui_ImplDX11_RenderDrawData( ImGui::GetDrawData() );
 }
 
-void ImGuiManager::SpawnInstructionWindow() const noexcept
-{
-    if ( ImGui::Begin( "Scene Instructions", FALSE, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove ) )
-    {
-        if ( ImGui::CollapsingHeader( "Camera Controls", ImGuiTreeNodeFlags_DefaultOpen ) )
-        {
-            ImGui::Text( "WASD    ->  Walk" );
-            ImGui::Text( "SHIFT   ->  Run" );
-            ImGui::Text( "RMB     ->  Turn" );
-        }
-        if ( ImGui::CollapsingHeader( "Level System", ImGuiTreeNodeFlags_DefaultOpen ) )
-        {
-            ImGui::Text( "F1      ->  Level 1: Forces" );
-            ImGui::Text( "F2      ->  Level 2: Particles" );
-            ImGui::Text( "F3      ->  Level 3: Rigid Bodies" );
-        }
-    }
-    ImGui::End();
-}
-
 void ImGuiManager::SetGreenTheme() const noexcept
 {
     ImVec4* colors = ImGui::GetStyle().Colors;
