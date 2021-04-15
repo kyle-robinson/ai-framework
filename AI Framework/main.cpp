@@ -13,6 +13,7 @@
 #include "Background.h"
 #include "PickupItem.h"
 #include "ErrorLogger.h"
+#include "ImGuiManager.h"
 
 //#define PICK_MODE // Ignore this, it is not needed, but might be useful for debugging
 
@@ -78,6 +79,7 @@ int g_viewHeight;
 vecDrawables g_GameObjects;
 Background g_background;
 AIManager g_AIManager;
+ImGuiManager imgui;
 
 //--------------------------------------------------------------------------------------
 // Entry point to the program. Initializes everything and goes into a message processing 
@@ -401,6 +403,9 @@ HRESULT InitDevice()
     // initialise the AI / SceneManager
     g_AIManager.Initialise( g_hWnd, g_pd3dDevice, SCREEN_WIDTH, SCREEN_HEIGHT );
 
+    // initialise imgui
+    imgui.Initialize( g_hWnd, g_pd3dDevice.Get(), g_pImmediateContext.Get() );
+
     return S_OK;
 }
 
@@ -517,8 +522,12 @@ void CleanupDevice()
 //--------------------------------------------------------------------------------------
 // Called every time the application receives a message
 //--------------------------------------------------------------------------------------
+extern LRESULT ImGui_ImplWin32_WndProcHandler( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
+    if ( ImGui_ImplWin32_WndProcHandler( hWnd, message, wParam, lParam ) )
+        return true;
+
     PAINTSTRUCT ps;
     HDC hdc;
 
@@ -618,6 +627,7 @@ void Render()
     deltaTime = ( timeCur - timeStart ) / 1000.0f;
 	timeStart = timeCur;
 
+    imgui.BeginRender();
     Update( deltaTime );
     
     // Clear the back buffer
@@ -641,6 +651,7 @@ void Render()
     g_GameObjects.clear(); // the list of items to draw is cleared each frame
 
     // Present our back buffer to our front buffer
+    imgui.EndRender();
     g_pSwapChain->Present( 0, 0 );
 }
 

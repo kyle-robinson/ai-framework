@@ -5,6 +5,7 @@
 #include "SteeringBehaviour.h"
 #include <sstream>
 #include "main.h"
+#include <imgui/imgui.h>
 
 Waypoint* AIManager::GetWaypoint( const int x, const int y )
 {
@@ -117,6 +118,8 @@ void AIManager::Update( const float fDeltaTime )
     }
     AddItemToDrawList( m_pCarBlue );
     AddItemToDrawList( m_pCarRed );
+
+    SpawnControlWindow();
 }
 
 /*void AIManager::LeftMouseUp( const int x, const int y )
@@ -190,4 +193,14 @@ bool AIManager::checkForCollisions( Vehicle* car )
     }
 
     return false;
+}
+
+void AIManager::SpawnControlWindow()
+{
+    if ( ImGui::Begin( "Control Window", FALSE, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove ) )
+    {
+        static float sliderVariable = 0.0f;
+        ImGui::SliderFloat( "Slider float", &sliderVariable, 0.0f, 1.0f );
+    }
+    ImGui::End();
 }

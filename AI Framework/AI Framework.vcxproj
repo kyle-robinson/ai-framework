@@ -27,12 +27,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\External\imgui\imgui.cpp" />
+    <ClCompile Include="..\External\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\External\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="..\External\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="..\External\imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Source\AIManager.cpp" />
     <ClCompile Include="Source\Background.cpp" />
     <ClCompile Include="Source\DDSTextureLoader.cpp" />
     <ClCompile Include="Source\DrawableGameObject.cpp" />
     <ClCompile Include="Source\ErrorLogger.cpp" />
+    <ClCompile Include="Source\ImGuiManager.cpp" />
     <ClCompile Include="Source\PathFinder.cpp" />
     <ClCompile Include="Source\PickupItem.cpp" />
     <ClCompile Include="Source\SteeringBehaviour.cpp" />
@@ -41,11 +47,20 @@
     <ClCompile Include="Source\Waypoint.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\External\imgui\imconfig.h" />
+    <ClInclude Include="..\External\imgui\imgui.h" />
+    <ClInclude Include="..\External\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="..\External\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="..\External\imgui\imgui_internal.h" />
+    <ClInclude Include="..\External\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\External\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\External\imgui\imstb_truetype.h" />
     <ClInclude Include="Headers\AIManager.h" />
     <ClInclude Include="Headers\Background.h" />
     <ClInclude Include="Headers\DDSTextureLoader.h" />
     <ClInclude Include="Headers\DrawableGameObject.h" />
     <ClInclude Include="Headers\ErrorLogger.h" />
+    <ClInclude Include="Headers\ImGuiManager.h" />
     <ClInclude Include="Headers\MovingEntity.h" />
     <ClInclude Include="Headers\PathFinder.h" />
     <ClInclude Include="Headers\PickupItem.h" />
@@ -153,7 +168,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
-    <IncludePath>$(ProjectDir);$(ProjectDir)Headers;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)Headers;$(SolutionDir)External;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
     <LinkIncremental>true</LinkIncremental>

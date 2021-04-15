@@ -34,6 +34,8 @@ public:
 	Waypoint* GetWaypoint( const int x, const int y );
 	vecWaypoints GetNeighbours( const int x, const int y );
 	vecWaypoints GetWaypoints() const noexcept { return m_waypoints; }
+
+	void SpawnControlWindow();
 protected:
 	bool checkForCollisions( Vehicle* car );
 private:
