@@ -82,7 +82,7 @@ SteeringBehaviour::SteeringBehaviour( Vehicle* vehicle ) :
     m_dWeightFlee( 1.0 ),
     m_dWeightSeek( 1.0 ),
     m_dWeightPursuit( 1.0 ),
-    m_dWeightObstacleAvoidance( 1.0 )
+    m_dWeightObstacleAvoidance( 10.0 )
 {
     double theta = RandFloat() * TwoPi;
     m_vWanderTarget = Vector2D( m_dWanderRadius * cos( theta ), m_dWanderRadius * sin( theta ) );
@@ -96,8 +96,7 @@ Vector2D SteeringBehaviour::Calculate()
 
     if ( On( OBSTACLE ) )
     {
-        force = ObstacleAvoidance( m_pVehicle->World()->GetObstacles() ) *
-            m_dWeightObstacleAvoidance;
+        force = ObstacleAvoidance( m_pVehicle->World()->GetObstacles() ) * m_dWeightObstacleAvoidance;
         if ( !AccumulateForce( m_vSteeringForce, force ) ) return m_vSteeringForce;
     }
 

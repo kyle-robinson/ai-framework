@@ -84,13 +84,8 @@ float4 PS(PS_INPUT IN) : SV_TARGET
 	float4 specular = lit.Specular;
 
 	float4 texColor = txDiffuse.Sample(samLinear, IN.Tex);
-
 	float4 finalColor = (ambient + diffuse + specular) * texColor;
-	
-    if ( finalColor.r >= 0.95f &&
-		finalColor.g >= 0.95f &&
-		finalColor.b >= 0.95f )
-        discard;
+    clip( finalColor.a - 0.25f );
 	
     return finalColor;
 }

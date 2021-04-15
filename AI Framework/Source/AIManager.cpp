@@ -138,16 +138,23 @@ void AIManager::CreateObstacles()
 
             if ( NumTrys > NumAllowableTrys ) return;
 
-            int radius = RandInt( ( int )10, ( int )30 );
+            int radius = 50;
 
             const int border = 10;
             const int MinGapBetweenObstacles = 20;
 
-            Obstacle* ob = new Obstacle( RandInt( radius + border, width - radius - border ),
-                RandInt( radius + border, height - radius - 30 - border ),
-                radius );
+            RECT rect;
+            GetClientRect( GetHWND(), &rect );
+            int cxClient = rect.right;
+            int cyClient = rect.bottom;
 
-            HRESULT hr = ob->InitMesh( device.Get(), L"Resources\\Textures\\stone.dds" );
+            Obstacle* ob = new Obstacle(
+                RandInt( ( -cxClient / 2 ) + radius + border, ( cxClient / 2 ) - radius - border ),
+                RandInt( ( -cyClient / 2 ) + radius + border, ( cyClient / 2 ) - radius - 30 - border ),
+                radius
+            );
+
+            HRESULT hr = ob->InitMesh( device.Get(), L"Resources\\Textures\\tyre.dds" );
             if ( FAILED( hr ) ) return;
 
             if ( !Overlapped( ob, m_obstacles, MinGapBetweenObstacles ) )

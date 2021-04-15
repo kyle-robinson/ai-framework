@@ -16,7 +16,7 @@ public:
 	
 	HRESULT	InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, const std::wstring& texturePath )
 	{
-		m_scale = { 20, 20 };
+		m_scale = { 30, 30 };
 		SetTextureName( texturePath );
 		return DrawableGameObject::initMesh( pd3dDevice );
 	}
