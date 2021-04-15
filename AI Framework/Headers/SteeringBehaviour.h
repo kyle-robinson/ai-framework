@@ -30,6 +30,7 @@ private:
 	} m_deceleration;
 private:
 	Vector2D m_vSteeringForce;
+	Vehicle* m_pTargetAgent;
 	Vehicle* m_pVehicle;
 
 	// behaviour parameters
@@ -38,6 +39,7 @@ private:
 	double m_dWanderRadius;
 	double m_dWanderDistance;
 
+	double m_dWeightPursuit;
 	double m_dWeightWander;
 	double m_dWeightArrive;
 	double m_dWeightFlee;
@@ -46,6 +48,7 @@ private:
 	// behaviours
 	bool AccumulateForce( Vector2D& RunningTot, Vector2D ForceToAdd );
 	Vector2D Arrive( Vector2D TargetPos, Deceleration deceleration );
+	Vector2D Pursuit( const Vehicle* agent );
 	Vector2D Flee( Vector2D TargetPos );
 	Vector2D Seek( Vector2D TargetPos );
 	Vector2D Wander();
@@ -75,6 +78,11 @@ public:
 	void SeekOn() { m_iFlags |= SEEK; }
 	void SeekOff() { if ( On( SEEK ) ) m_iFlags ^= SEEK; }
 	bool IsSeekOn() { return On( SEEK ); }
+
+	// pursuit
+	void PursuitOn( Vehicle* vehicle ) { m_iFlags |= PURSUIT; m_pTargetAgent = vehicle; }
+	void PursuitOff() { if ( On( PURSUIT ) ) m_iFlags ^= PURSUIT; }
+	bool IsPursuitOn() { return On( PURSUIT ); }
 
 	// wander
 	void WanderOn() { m_iFlags |= WANDER; }

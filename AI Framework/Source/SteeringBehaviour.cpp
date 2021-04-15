@@ -34,7 +34,8 @@ SteeringBehaviour::SteeringBehaviour( Vehicle* vehicle ) :
     m_dWanderJitter( 80.0 ),
     m_dWanderRadius( 1.2 ),
     m_dWeightFlee( 1.0 ),
-    m_dWeightSeek( 1.0 )
+    m_dWeightSeek( 1.0 ),
+    m_dWeightPursuit( 1.0 )
 {
     double theta = RandFloat() * TwoPi;
     m_vWanderTarget = Vector2D( m_dWanderRadius * cos( theta ), m_dWanderRadius * sin( theta ) );
@@ -63,6 +64,14 @@ Vector2D SteeringBehaviour::Calculate()
     if ( On( ARRIVE ) )
     {
         force = Arrive( m_pVehicle->World()->GetCrosshair(), m_deceleration ) * m_dWeightArrive;
+        if ( !AccumulateForce( m_vSteeringForce, force ) )
+            return m_vSteeringForce;
+    }
+
+    if ( On( PURSUIT ) )
+    {
+        assert( m_pTargetAgent && "Pursuit target not assigned!" );
+        force = Pursuit( m_pTargetAgent ) * m_dWeightPursuit;
         if ( !AccumulateForce( m_vSteeringForce, force ) )
             return m_vSteeringForce;
     }
@@ -168,6 +177,32 @@ Vector2D SteeringBehaviour::Seek( Vector2D TargetPos )
         * m_pVehicle->GetMaxSpeed();
 
     return ( DesiredVelocity - m_pVehicle->GetVelocity() );
+}
+
+Vector2D SteeringBehaviour::Pursuit( const Vehicle* evader )
+{
+    //if the evader is ahead and facing the agent then we can just seek
+    //for the evader's current position.
+    Vector2D ToEvader = evader->GetPosition() - m_pVehicle->GetPosition();
+
+    double RelativeHeading = m_pVehicle->GetHeading().Dot( evader->GetHeading() );
+
+    if ( ( ToEvader.Dot( m_pVehicle->GetHeading() ) > 0 ) &&
+        ( RelativeHeading < -0.95 ) )  //acos(0.95)=18 degs
+    {
+        return Seek( evader->GetPosition() );
+    }
+
+    //Not considered ahead so we predict where the evader will be.
+
+    //the lookahead time is propotional to the distance between the evader
+    //and the pursuer; and is inversely proportional to the sum of the
+    //agent's velocities
+    double LookAheadTime = ToEvader.Length() /
+        ( m_pVehicle->GetMaxSpeed() + evader->GetSpeed() );
+
+    //now seek to the predicted future position of the evader
+    return Seek( evader->GetPosition() + evader->GetVelocity() * LookAheadTime );
 }
 
 Vector2D SteeringBehaviour::Wander()
