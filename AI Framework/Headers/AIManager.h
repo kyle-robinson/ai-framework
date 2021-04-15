@@ -47,7 +47,8 @@ private:
 	Vector2D m_crosshair;
 	bool m_paused = false;
 
-	Vehicle* m_pCar;
+	Vehicle* m_pCarRed;
+	Vehicle* m_pCarBlue;
 	vecPickups m_pickups;
 	vecWaypoints m_waypoints;
 	std::vector<Vector2D> path;

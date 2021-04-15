@@ -54,23 +54,19 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> p
     //m_pickups.push_back( pPickup );
 
     // create the vehicle ------------------------------------------------
-    double xPos = 0.0;
-    double yPos = 0.0;
+    m_pCarBlue = new Vehicle( this, { 0.0, 0.0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 200.0 );
+    HRESULT hr = m_pCarBlue->InitMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_blue.dds" );
+    //m_pCarBlue->Steering()->ArriveOn();
+    //m_pCarBlue->Steering()->FleeOn();
+    m_pCarBlue->Steering()->SeekOn();
+    //m_pCarBlue->Steering()->WanderOn();
 
-    m_pCar = new Vehicle( this, { xPos, yPos }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 200.0 );
-    HRESULT hr = m_pCar->InitMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_blue.dds" );
-    //m_pCar->Steering()->ArriveOn();
-    //m_pCar->Steering()->FleeOn();
-    m_pCar->Steering()->SeekOn();
-    //m_pCar->Steering()->WanderOn();
-
-    /*m_pCar2 = new Vehicle();
-    hr = m_pCar2->initMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_red.dds" );
-    m_pCar2->setPositionTo( XMFLOAT3( width / 2, 0.0f, 0 ) );
-    if ( FAILED( hr ) ) return hr;
+    m_pCarRed = new Vehicle( this, { 0.0, 50.0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 200.0 );
+    hr = m_pCarRed->InitMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_red.dds" );
+    m_pCarRed->Steering()->WanderOn();
 
     // create the waypoints
-    float xGap = SCREEN_WIDTH / WAYPOINT_RESOLUTION;
+    /*float xGap = SCREEN_WIDTH / WAYPOINT_RESOLUTION;
     float yGap = SCREEN_HEIGHT / WAYPOINT_RESOLUTION;
     float xStart = -( SCREEN_WIDTH / 2 ) + ( xGap / 2 );
     float yStart = -( SCREEN_HEIGHT / 2 ) + ( yGap / 2 );
@@ -87,7 +83,7 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> p
         }
     }*/
 
-    return S_OK;
+    return hr;
 }
 
 void AIManager::Update( const float fDeltaTime )
@@ -115,11 +111,12 @@ void AIManager::Update( const float fDeltaTime )
 
     // cars
     if ( !IsPaused() )
-        m_pCar->Update( fDeltaTime );
-    AddItemToDrawList( m_pCar );
-
-    //m_pCar2->update( fDeltaTime );
-    //AddItemToDrawList( m_pCar2 );
+    {
+        m_pCarBlue->Update( fDeltaTime );
+        m_pCarRed->Update( fDeltaTime );
+    }
+    AddItemToDrawList( m_pCarBlue );
+    AddItemToDrawList( m_pCarRed );
 }
 
 /*void AIManager::LeftMouseUp( const int x, const int y )
