@@ -60,7 +60,8 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> p
     m_pCar = new Vehicle( this, { xPos, yPos }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 200.0 );
     HRESULT hr = m_pCar->InitMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_blue.dds" );
     //m_pCar->Steering()->ArriveOn();
-    m_pCar->Steering()->FleeOn();
+    //m_pCar->Steering()->FleeOn();
+    m_pCar->Steering()->SeekOn();
     //m_pCar->Steering()->WanderOn();
 
     /*m_pCar2 = new Vehicle();

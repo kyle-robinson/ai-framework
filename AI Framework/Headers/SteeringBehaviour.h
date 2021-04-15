@@ -41,11 +41,13 @@ private:
 	double m_dWeightWander;
 	double m_dWeightArrive;
 	double m_dWeightFlee;
+	double m_dWeightSeek;
 
 	// behaviours
 	bool AccumulateForce( Vector2D& RunningTot, Vector2D ForceToAdd );
-	Vector2D Arrive( Vector2D targetPos, Deceleration deceleration );
-	Vector2D Flee( Vector2D targetPos );
+	Vector2D Arrive( Vector2D TargetPos, Deceleration deceleration );
+	Vector2D Flee( Vector2D TargetPos );
+	Vector2D Seek( Vector2D TargetPos );
 	Vector2D Wander();
 
 	int m_iFlags;
@@ -68,6 +70,11 @@ public:
 	void FleeOn() { m_iFlags |= FLEE; }
 	void FleeOff() { if ( On( FLEE ) ) m_iFlags ^= FLEE; }
 	bool IsFleeOn() { return On( FLEE ); }
+
+	// seek
+	void SeekOn() { m_iFlags |= SEEK; }
+	void SeekOff() { if ( On( SEEK ) ) m_iFlags ^= SEEK; }
+	bool IsSeekOn() { return On( SEEK ); }
 
 	// wander
 	void WanderOn() { m_iFlags |= WANDER; }

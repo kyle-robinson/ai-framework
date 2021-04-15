@@ -33,7 +33,8 @@ SteeringBehaviour::SteeringBehaviour( Vehicle* vehicle ) :
     m_dWanderDistance( 2.0 ),
     m_dWanderJitter( 80.0 ),
     m_dWanderRadius( 1.2 ),
-    m_dWeightFlee( 1.0 )
+    m_dWeightFlee( 1.0 ),
+    m_dWeightSeek( 1.0 )
 {
     double theta = RandFloat() * TwoPi;
     m_vWanderTarget = Vector2D( m_dWanderRadius * cos( theta ), m_dWanderRadius * sin( theta ) );
@@ -48,6 +49,13 @@ Vector2D SteeringBehaviour::Calculate()
     if ( On( FLEE ) )
     {
         force = Flee( m_pVehicle->World()->GetCrosshair() ) * m_dWeightFlee;
+        if ( !AccumulateForce( m_vSteeringForce, force ) )
+            return m_vSteeringForce;
+    }
+
+    if ( On( SEEK ) )
+    {
+        force = Seek( m_pVehicle->World()->GetCrosshair() ) * m_dWeightSeek;
         if ( !AccumulateForce( m_vSteeringForce, force ) )
             return m_vSteeringForce;
     }
@@ -115,9 +123,9 @@ bool SteeringBehaviour::AccumulateForce( Vector2D& RunningTot, Vector2D ForceToA
 //  This behavior is similar to seek but it attempts to arrive at the
 //  target with a zero velocity
 //------------------------------------------------------------------------
-Vector2D SteeringBehaviour::Arrive( Vector2D targetPos, Deceleration deceleration )
+Vector2D SteeringBehaviour::Arrive( Vector2D TargetPos, Deceleration deceleration )
 {
-    Vector2D ToTarget = targetPos - m_pVehicle->GetPosition();
+    Vector2D ToTarget = TargetPos - m_pVehicle->GetPosition();
 
     //calculate the distance to the target
     double dist = ToTarget.Length();
@@ -149,6 +157,14 @@ Vector2D SteeringBehaviour::Arrive( Vector2D targetPos, Deceleration deceleratio
 Vector2D SteeringBehaviour::Flee( Vector2D TargetPos )
 {
     Vector2D DesiredVelocity = Vec2DNormalize( m_pVehicle->GetPosition() - TargetPos )
+        * m_pVehicle->GetMaxSpeed();
+
+    return ( DesiredVelocity - m_pVehicle->GetVelocity() );
+}
+
+Vector2D SteeringBehaviour::Seek( Vector2D TargetPos )
+{
+    Vector2D DesiredVelocity = Vec2DNormalize( TargetPos - m_pVehicle->GetPosition() )
         * m_pVehicle->GetMaxSpeed();
 
     return ( DesiredVelocity - m_pVehicle->GetVelocity() );
