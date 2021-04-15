@@ -33,8 +33,15 @@ private:
 	Vehicle* m_pVehicle;
 	Vector2D m_vSteeringForce;
 
+	Vector2D m_vWanderTarget;
+	double m_dWanderJitter;
+	double m_dWanderRadius;
+	double m_dWanderDistance;
+	double m_dWeightWander;
+
 	bool AccumulateForce( Vector2D& RunningTot, Vector2D ForceToAdd );
 	Vector2D Arrive( Vector2D targetPos, Deceleration deceleration );
+	Vector2D Wander();
 
 	int m_iFlags;
 	bool On( BehaviourType type ) { return ( m_iFlags & type ) == type; }
@@ -49,6 +56,14 @@ public:
 	void ArriveOn() { m_iFlags |= ARRIVE; }
 	void ArriveOff() { if ( On( ARRIVE ) ) m_iFlags ^= ARRIVE; }
 	bool IsArriveOn() { return On( ARRIVE ); }
+
+	void WanderOn() { m_iFlags |= WANDER; }
+	void WanderOff() { if ( On( WANDER ) ) m_iFlags ^= WANDER; }
+	bool IsWanderOn() { return On( WANDER ); }
+
+	double GetWanderJitter() const { return m_dWanderJitter; }
+	double GetWanderDistance() const { return m_dWanderDistance; }
+	double GetWanderRadius() const { return m_dWanderRadius; }
 };
 
 #endif

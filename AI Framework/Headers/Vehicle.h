@@ -25,7 +25,9 @@ public:
 
 	AIManager* const World() const noexcept { return m_pWorld; }
 	SteeringBehaviour* const Steering() const noexcept { return m_pSteering; }
+	double GetDeltaTime() const noexcept { return m_dTimeElapsed; }
 private:
+	double m_dTimeElapsed;
 	AIManager* m_pWorld;
 	SteeringBehaviour* m_pSteering;
 };

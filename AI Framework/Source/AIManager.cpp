@@ -59,7 +59,8 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> p
 
     m_pCar = new Vehicle( this, { xPos, yPos }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 200.0 );
     HRESULT hr = m_pCar->InitMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_blue.dds" );
-    m_pCar->Steering()->ArriveOn();
+    //m_pCar->Steering()->ArriveOn();
+    m_pCar->Steering()->WanderOn();
 
     /*m_pCar2 = new Vehicle();
     hr = m_pCar2->initMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_red.dds" );
@@ -111,8 +112,8 @@ void AIManager::Update( const float fDeltaTime )
     }*/
 
     // cars
-    //if ( !m_paused )
-    m_pCar->Update( fDeltaTime );
+    if ( !IsPaused() )
+        m_pCar->Update( fDeltaTime );
     AddItemToDrawList( m_pCar );
 
     //m_pCar2->update( fDeltaTime );
@@ -145,51 +146,6 @@ void AIManager::HandleKeyPresses( WPARAM param )
 {
     switch ( param )
     {
-        /*case VK_NUMPAD0:
-        {
-            OutputDebugStringA( "0 pressed \n" );
-            break;
-        }
-        case VK_NUMPAD1:
-        {
-            // Vector2D Distance Calculation
-            Vector2D vec1 = { 1.0f, 2.0f };
-            Vector2D vec2 = { 7.0f, 4.0f };
-            double distance = vec1.Distance( vec2 );
-            std::wstringstream oss;
-            oss << "Distance Between Vectors (" << vec1.x << ',' << vec1.y << ") + (" << vec2.x << ',' << vec2.y << ") = " << distance;
-            MessageBox( nullptr, oss.str().c_str(), L"Vector2D Distance", MB_OK );
-            break;
-        }
-        case VK_NUMPAD2:
-        {
-            // Vector2D Addition
-            Vector2D vec1 = { 1.0f, 2.0f };
-            Vector2D vec2 = { 7.0f, 4.0f };
-            Vector2D vec3 = vec1 + vec2;
-            std::wstringstream oss;
-            oss << '(' << vec1.x << ',' << vec1.y << ") + (" << vec2.x << ',' << vec2.y << ") = (" << vec3.x << ',' << vec3.y << ')';
-            MessageBox( nullptr, oss.str().c_str(), L"Vector2D Addition", MB_OK );
-            break;
-        }
-        case VK_NUMPAD3:
-        {
-            // seek the red car
-            m_pCar->setPositionTo( *m_pCar2->getPosition() );
-            break;
-        }
-        case VK_NUMPAD4:
-        {
-            // flee the red car
-            m_pCar->setPositionTo( Flee( *m_pCar2->getPosition() ) );
-            break;
-        }
-        case VK_NUMPAD5:
-        {
-            // arrive at the red car
-            m_pCar->setPositionTo( Arrive( *m_pCar2->getPosition(), slow ) );
-            break;
-        }*/
     case 'P':
         TogglePause();
         break;

@@ -37,6 +37,8 @@ HRESULT	Vehicle::InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, cons
 
 void Vehicle::Update( const float deltaTime )
 {
+	m_dTimeElapsed = deltaTime;
+
 	Vector2D OldPos = GetPosition();
 
 	// calculate the net force for each steering behaviour

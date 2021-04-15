@@ -1,21 +1,59 @@
 #include "SteeringBehaviour.h"
 #include "AIManager.h"
 
+inline Vector2D PointToWorldSpace( const Vector2D& point,
+    const Vector2D& AgentHeading,
+    const Vector2D& AgentSide,
+    const Vector2D& AgentPosition )
+{
+    //make a copy of the point
+    Vector2D TransPoint = point;
+
+    //create a transformation matrix
+    C2DMatrix matTransform;
+
+    //rotate
+    matTransform.Rotate( AgentHeading, AgentSide );
+
+    //and translate
+    matTransform.Translate( AgentPosition.x, AgentPosition.y );
+
+    //now transform the vertices
+    matTransform.TransformVector2Ds( TransPoint );
+
+    return TransPoint;
+}
+
 SteeringBehaviour::SteeringBehaviour( Vehicle* vehicle ) :
 	m_pVehicle( vehicle ),
 	m_iFlags( 0 ),
 	m_dWeightArrive( 1.0 ),
-	m_deceleration( NORMAL )
-{ }
+	m_deceleration( NORMAL ),
+    m_dWeightWander( 1.0 ),
+    m_dWanderDistance( 2.0 ),
+    m_dWanderJitter( 80.0 ),
+    m_dWanderRadius( 1.2 )
+{
+    double theta = RandFloat() * TwoPi;
+    m_vWanderTarget = Vector2D( m_dWanderRadius * cos( theta ), m_dWanderRadius * sin( theta ) );
+}
 
 Vector2D SteeringBehaviour::Calculate()
 {
     //reset the steering force
     m_vSteeringForce.Zero();
+    Vector2D force;
 
     if ( On( ARRIVE ) )
     {
-        Vector2D force = Arrive( m_pVehicle->World()->GetCrosshair(), m_deceleration ) * m_dWeightArrive;
+        force = Arrive( m_pVehicle->World()->GetCrosshair(), m_deceleration ) * m_dWeightArrive;
+        if ( !AccumulateForce( m_vSteeringForce, force ) )
+            return m_vSteeringForce;
+    }
+
+    if ( On( WANDER ) )
+    {
+        force = Wander() * m_dWeightWander;
         if ( !AccumulateForce( m_vSteeringForce, force ) )
             return m_vSteeringForce;
     }
@@ -98,4 +136,34 @@ Vector2D SteeringBehaviour::Arrive( Vector2D targetPos, Deceleration deceleratio
     }
 
     return Vector2D( 0, 0 );
+}
+
+Vector2D SteeringBehaviour::Wander()
+{
+    //this behavior is dependent on the update rate, so this line must
+    //be included when using time independent framerate.
+    double JitterThisTimeSlice = m_dWanderJitter * m_pVehicle->GetDeltaTime();
+
+    //first, add a small random vector to the target's position
+    m_vWanderTarget += Vector2D( RandomClamped() * JitterThisTimeSlice,
+        RandomClamped() * JitterThisTimeSlice );
+
+    //reproject this new vector back on to a unit circle
+    m_vWanderTarget.Normalize();
+
+    //increase the length of the vector to the same as the radius
+    //of the wander circle
+    m_vWanderTarget *= m_dWanderRadius;
+
+    //move the target into a position WanderDist in front of the agent
+    Vector2D target = m_vWanderTarget + Vector2D( m_dWanderDistance, 0 );
+
+    //project the target into world space
+    Vector2D Target = PointToWorldSpace( target,
+        m_pVehicle->GetHeading(),
+        m_pVehicle->GetSide(),
+        m_pVehicle->GetPosition() );
+
+    //and steer towards it
+    return Target - m_pVehicle->GetPosition();
 }
