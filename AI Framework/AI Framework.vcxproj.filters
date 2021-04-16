@@ -40,46 +40,19 @@
     <Filter Include="Resources\ImGui">
       <UniqueIdentifier>{155523b9-7600-4f45-8252-1cfc1e14fc4d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\Logging">
+      <UniqueIdentifier>{de948fe0-4e1e-45ae-b730-26b42b84c5e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Utility\Math">
+      <UniqueIdentifier>{352a2dec-6798-4cba-b4be-f57c950d91c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Utility\Logging">
+      <UniqueIdentifier>{2f22e412-1c52-4487-a685-3f6601b563f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\AIManager.cpp">
-      <Filter>Source\AI</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Waypoint.cpp">
-      <Filter>Source\AI</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Background.cpp">
-      <Filter>Source\Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Vehicle.cpp">
-      <Filter>Source\Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\PickupItem.cpp">
-      <Filter>Source\Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DDSTextureLoader.cpp">
-      <Filter>Source\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DrawableGameObject.cpp">
-      <Filter>Source\Model</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ErrorLogger.cpp">
-      <Filter>Source\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\StringConverter.cpp">
-      <Filter>Source\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\PathFinder.cpp">
-      <Filter>Source\AI</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\SteeringBehaviour.cpp">
-      <Filter>Source\AI</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ImGuiManager.cpp">
-      <Filter>Source\Utility</Filter>
     </ClCompile>
     <ClCompile Include="..\External\imgui\imgui.cpp">
       <Filter>Resources\ImGui</Filter>
@@ -96,64 +69,46 @@
     <ClCompile Include="..\External\imgui\imgui_widgets.cpp">
       <Filter>Resources\ImGui</Filter>
     </ClCompile>
+    <ClCompile Include="AI\AIManager.cpp">
+      <Filter>Source\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="AI\PathFinder.cpp">
+      <Filter>Source\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="AI\SteeringBehaviour.cpp">
+      <Filter>Source\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="AI\Waypoint.cpp">
+      <Filter>Source\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\Background.cpp">
+      <Filter>Source\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\PickupItem.cpp">
+      <Filter>Source\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\Vehicle.cpp">
+      <Filter>Source\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\DrawableGameObject.cpp">
+      <Filter>Source\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\DDSTextureLoader.cpp">
+      <Filter>Source\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Logging\StringConverter.cpp">
+      <Filter>Source\Utility\Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Logging\ErrorLogger.cpp">
+      <Filter>Source\Utility\Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\ImGuiManager.cpp">
+      <Filter>Source\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Headers\structures.h">
-      <Filter>Headers\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Vector2D.h">
-      <Filter>Headers\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Background.h">
-      <Filter>Headers\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\PickupItem.h">
-      <Filter>Headers\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Vehicle.h">
-      <Filter>Headers\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\DrawableGameObject.h">
-      <Filter>Headers\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\DDSTextureLoader.h">
-      <Filter>Headers\Model</Filter>
-    </ClInclude>
     <ClInclude Include="main.h">
       <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\ErrorLogger.h">
-      <Filter>Headers\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\StringConverter.h">
-      <Filter>Headers\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\PathFinder.h">
-      <Filter>Headers\AI</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\AIManager.h">
-      <Filter>Headers\AI</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Waypoint.h">
-      <Filter>Headers\AI</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\SteeringBehaviour.h">
-      <Filter>Headers\AI</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\C2DMatrix.h">
-      <Filter>Headers\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Utility.h">
-      <Filter>Headers\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\MovingEntity.h">
-      <Filter>Headers\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\ImGuiManager.h">
-      <Filter>Headers\Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\External\imgui\imconfig.h">
       <Filter>Resources\ImGui</Filter>
@@ -179,8 +134,71 @@
     <ClInclude Include="..\External\imgui\imstb_truetype.h">
       <Filter>Resources\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\Obstacle.h">
+    <ClInclude Include="AI\AIManager.h">
+      <Filter>Headers\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="AI\PathFinder.h">
+      <Filter>Headers\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="AI\SteeringBehaviour.h">
+      <Filter>Headers\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="AI\Waypoint.h">
+      <Filter>Headers\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\Background.h">
       <Filter>Headers\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\MovingEntity.h">
+      <Filter>Headers\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\Obstacle.h">
+      <Filter>Headers\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\PickupItem.h">
+      <Filter>Headers\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\Vehicle.h">
+      <Filter>Headers\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\DDSTextureLoader.h">
+      <Filter>Headers\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\DrawableGameObject.h">
+      <Filter>Headers\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\Logging\ErrorLogger.h">
+      <Filter>Headers\Utility\Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\Logging\StringConverter.h">
+      <Filter>Headers\Utility\Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\Math\C2DMatrix.h">
+      <Filter>Headers\Utility\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\Math\Vector2D.h">
+      <Filter>Headers\Utility\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\ImGuiManager.h">
+      <Filter>Headers\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\Structures.h">
+      <Filter>Headers\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\Utility.h">
+      <Filter>Headers\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\resource.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\Logging\COMException.h">
+      <Filter>Headers\Utility\Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\Math\Transformations.h">
+      <Filter>Headers\Utility\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\EntityTemplates.h">
+      <Filter>Headers\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -211,9 +229,12 @@
     <Image Include="Resources\Textures\yellow.dds">
       <Filter>Resources\Textures</Filter>
     </Image>
+    <Image Include="Resources\Textures\tyre.dds">
+      <Filter>Resources\Textures</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resources\Shaders\shader.fx">
+    <FxCompile Include="Resources\shader.fx">
       <Filter>Resources</Filter>
     </FxCompile>
   </ItemGroup>

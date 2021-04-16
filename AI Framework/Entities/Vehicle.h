@@ -20,14 +20,14 @@ public:
 		double maxSpeed,
 		double maxTurnRate
 	);
-	virtual HRESULT InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, const std::wstring& texturePath );
-	virtual void Update( const float deltaTime );
+	HRESULT InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> device, const std::wstring& texturePath );
+	void Update( const float dt ) override;
+	double GetDeltaTime() const noexcept { return m_fTimeElapsed; }
 
 	AIManager* const World() const noexcept { return m_pWorld; }
 	SteeringBehaviour* const Steering() const noexcept { return m_pSteering; }
-	double GetDeltaTime() const noexcept { return m_dTimeElapsed; }
 private:
-	double m_dTimeElapsed;
+	float m_fTimeElapsed;
 	AIManager* m_pWorld;
 	SteeringBehaviour* m_pSteering;
 };

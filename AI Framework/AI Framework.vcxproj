@@ -32,19 +32,19 @@
     <ClCompile Include="..\External\imgui\imgui_impl_dx11.cpp" />
     <ClCompile Include="..\External\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="..\External\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="AI\AIManager.cpp" />
+    <ClCompile Include="AI\PathFinder.cpp" />
+    <ClCompile Include="AI\SteeringBehaviour.cpp" />
+    <ClCompile Include="AI\Waypoint.cpp" />
+    <ClCompile Include="Entities\Background.cpp" />
+    <ClCompile Include="Entities\PickupItem.cpp" />
+    <ClCompile Include="Entities\Vehicle.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Source\AIManager.cpp" />
-    <ClCompile Include="Source\Background.cpp" />
-    <ClCompile Include="Source\DDSTextureLoader.cpp" />
-    <ClCompile Include="Source\DrawableGameObject.cpp" />
-    <ClCompile Include="Source\ErrorLogger.cpp" />
-    <ClCompile Include="Source\ImGuiManager.cpp" />
-    <ClCompile Include="Source\PathFinder.cpp" />
-    <ClCompile Include="Source\PickupItem.cpp" />
-    <ClCompile Include="Source\SteeringBehaviour.cpp" />
-    <ClCompile Include="Source\StringConverter.cpp" />
-    <ClCompile Include="Source\Vehicle.cpp" />
-    <ClCompile Include="Source\Waypoint.cpp" />
+    <ClCompile Include="Model\DDSTextureLoader.cpp" />
+    <ClCompile Include="Model\DrawableGameObject.cpp" />
+    <ClCompile Include="Utility\ImGuiManager.cpp" />
+    <ClCompile Include="Utility\Logging\ErrorLogger.cpp" />
+    <ClCompile Include="Utility\Logging\StringConverter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\External\imgui\imconfig.h" />
@@ -55,26 +55,29 @@
     <ClInclude Include="..\External\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\External\imgui\imstb_textedit.h" />
     <ClInclude Include="..\External\imgui\imstb_truetype.h" />
-    <ClInclude Include="Headers\AIManager.h" />
-    <ClInclude Include="Headers\Background.h" />
-    <ClInclude Include="Headers\DDSTextureLoader.h" />
-    <ClInclude Include="Headers\DrawableGameObject.h" />
-    <ClInclude Include="Headers\ErrorLogger.h" />
-    <ClInclude Include="Headers\ImGuiManager.h" />
-    <ClInclude Include="Headers\MovingEntity.h" />
-    <ClInclude Include="Headers\Obstacle.h" />
-    <ClInclude Include="Headers\PathFinder.h" />
-    <ClInclude Include="Headers\PickupItem.h" />
-    <ClInclude Include="Headers\SteeringBehaviour.h" />
-    <ClInclude Include="Headers\StringConverter.h" />
-    <ClInclude Include="Headers\structures.h" />
-    <ClInclude Include="Headers\C2DMatrix.h" />
-    <ClInclude Include="Headers\Utility.h" />
-    <ClInclude Include="Headers\Vector2D.h" />
-    <ClInclude Include="Headers\Vehicle.h" />
-    <ClInclude Include="Headers\Waypoint.h" />
+    <ClInclude Include="AI\AIManager.h" />
+    <ClInclude Include="AI\PathFinder.h" />
+    <ClInclude Include="AI\SteeringBehaviour.h" />
+    <ClInclude Include="AI\Waypoint.h" />
+    <ClInclude Include="Entities\Background.h" />
+    <ClInclude Include="Entities\MovingEntity.h" />
+    <ClInclude Include="Entities\Obstacle.h" />
+    <ClInclude Include="Entities\PickupItem.h" />
+    <ClInclude Include="Entities\Vehicle.h" />
     <ClInclude Include="main.h" />
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="Model\DDSTextureLoader.h" />
+    <ClInclude Include="Model\DrawableGameObject.h" />
+    <ClInclude Include="Resources\resource.h" />
+    <ClInclude Include="Utility\EntityTemplates.h" />
+    <ClInclude Include="Utility\ImGuiManager.h" />
+    <ClInclude Include="Utility\Logging\COMException.h" />
+    <ClInclude Include="Utility\Logging\ErrorLogger.h" />
+    <ClInclude Include="Utility\Logging\StringConverter.h" />
+    <ClInclude Include="Utility\Math\C2DMatrix.h" />
+    <ClInclude Include="Utility\Math\Transformations.h" />
+    <ClInclude Include="Utility\Math\Vector2D.h" />
+    <ClInclude Include="Utility\Structures.h" />
+    <ClInclude Include="Utility\Utility.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Textures\blue.dds" />
@@ -85,22 +88,13 @@
     <Image Include="Resources\Textures\red.dds" />
     <Image Include="Resources\Textures\stone.dds" />
     <Image Include="Resources\Textures\track.dds" />
+    <Image Include="Resources\Textures\tyre.dds" />
     <Image Include="Resources\Textures\yellow.dds" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resources\Shaders\shader.fx">
+    <FxCompile Include="Resources\shader.fx">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Effect</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Effect</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">Effect</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Effect</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">Effect</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
     </FxCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -169,7 +163,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
-    <IncludePath>$(ProjectDir);$(ProjectDir)Headers;$(SolutionDir)External;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)Utility;$(ProjectDir)Model;$(ProjectDir)Entities;$(ProjectDir)AI;$(SolutionDir)External;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
     <LinkIncremental>true</LinkIncremental>

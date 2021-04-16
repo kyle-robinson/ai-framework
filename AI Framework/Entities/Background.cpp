@@ -1,36 +1,15 @@
 #include "Background.h"
+#include "Structures.h"
 
 Background::Background()
 {
-	m_pVertexBuffer = nullptr;
-	m_pIndexBuffer = nullptr;
-	m_pTextureResourceView = nullptr;
-	m_pSamplerLinear = nullptr;
-
-	// Initialize the world matrix
-	XMStoreFloat4x4( &m_World, XMMatrixIdentity() );
+	XMStoreFloat4x4( &m_mWorld, XMMatrixIdentity() );
 }
 
-Background::~Background()
-{
-	if( m_pVertexBuffer ) 
-		m_pVertexBuffer->Release();
-	
-	if( m_pIndexBuffer )
-		m_pIndexBuffer->Release();	
-
-	if ( m_pTextureResourceView )
-		m_pTextureResourceView->Release();
-
-	if ( m_pSamplerLinear )
-		m_pSamplerLinear->Release();
-}
-
-HRESULT Background::initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice )
+HRESULT Background::InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> device )
 {
 	SimpleVertex vertices[] =
 	{
-		// NOTE Normal NOT required BUT USING SAME shader as normal cube rendering
 		{ { -1.0f, -1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } },
 		{ { -1.0f,  1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
 		{ {  1.0f,  1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f } },
@@ -39,7 +18,6 @@ HRESULT Background::initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice )
 
 	WORD indices[] =
 	{
-		// Front Face
 		0,  1,  2,
 		0,  2,  3,
 	};
@@ -53,7 +31,7 @@ HRESULT Background::initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice )
 
 	D3D11_SUBRESOURCE_DATA iinitData = { 0 };
 	iinitData.pSysMem = indices;
-	HRESULT hr = pd3dDevice->CreateBuffer( &indexBufferDesc, &iinitData, &m_pIndexBuffer );
+	HRESULT hr = device->CreateBuffer( &indexBufferDesc, &iinitData, &m_pIndexBuffer );
 
 	D3D11_BUFFER_DESC vertexBufferDesc = { 0 };
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -64,10 +42,10 @@ HRESULT Background::initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice )
 
 	D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
 	vertexBufferData.pSysMem = vertices;
-	hr = pd3dDevice->CreateBuffer( &vertexBufferDesc, &vertexBufferData, &m_pVertexBuffer );
+	hr = device->CreateBuffer( &vertexBufferDesc, &vertexBufferData, &m_pVertexBuffer );
 
 	// load and setup textures
-	hr = CreateDDSTextureFromFile( pd3dDevice.Get(), L"Resources\\Textures\\track.dds", nullptr, &m_pTextureResourceView );
+	hr = CreateDDSTextureFromFile( device.Get(), L"Resources\\Textures\\track.dds", nullptr, &m_pTextureResourceView );
 	if ( FAILED( hr ) ) return hr;
 
 	D3D11_SAMPLER_DESC sampDesc = {};
@@ -78,12 +56,13 @@ HRESULT Background::initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice )
 	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	hr = pd3dDevice->CreateSamplerState( &sampDesc, &m_pSamplerLinear );
-	
+	hr = device->CreateSamplerState( &sampDesc, &m_pSamplerLinear );
+
 	return hr;
 }
 
-void DepthTest( const bool isOn, Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext )
+void DepthTest( const bool isOn, Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice,
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext )
 {
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = { 0 };
 	if ( isOn )
@@ -119,19 +98,18 @@ void DepthTest( const bool isOn, Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice
 	pContext->OMSetDepthStencilState( m_DepthStencilState, 0 );
 }
 
-void Background::draw( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext )
+void Background::Draw( Microsoft::WRL::ComPtr<ID3D11Device> device, Microsoft::WRL::ComPtr<ID3D11DeviceContext> context )
 {
 	// turn depth write off
-	DepthTest( false, pd3dDevice, pContext );
+	DepthTest( false, device, context );
 	UINT stride = sizeof( SimpleVertex );
 	UINT offset = 0;
 
-	pContext->IASetVertexBuffers( 0, 1, &m_pVertexBuffer, &stride, &offset );
-	pContext->IASetIndexBuffer( m_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0 );
-	pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-	pContext->DrawIndexed( NUM_INDICES, 0, 0 );
+	context->IASetVertexBuffers( 0, 1, m_pVertexBuffer.GetAddressOf(), &stride, &offset );
+	context->IASetIndexBuffer( m_pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0 );
+	context->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	context->DrawIndexed( NUM_INDICES, 0, 0 );
 
 	// turn depth write back on
-	DepthTest( true, pd3dDevice, pContext );
+	DepthTest( true, device, context );
 }
-

@@ -1,10 +1,3 @@
-//--------------------------------------------------------------------------------------
-// File: main.cpp
-//
-// YOU SHOULDN'T NEED TO ALTER THIS 
-//--------------------------------------------------------------------------------------
-#define _XM_NO_INTRINSICS_
-
 #include <time.h>
 #include "main.h"
 #include "Vehicle.h"
@@ -12,17 +5,9 @@
 #include "AIManager.h"
 #include "Background.h"
 #include "PickupItem.h"
-#include "ErrorLogger.h"
 #include "ImGuiManager.h"
+#include "Logging/ErrorLogger.h"
 
-//--------------------------------------------------------------------------------------
-// eye position
-//--------------------------------------------------------------------------------------
-DirectX::XMFLOAT4 g_EyePosition( 0, 0, -200, 1 );
-
-//--------------------------------------------------------------------------------------
-// Forward declarations
-//--------------------------------------------------------------------------------------
 HRESULT InitWindow( HINSTANCE hInstance, int nCmdShow );
 HRESULT InitDevice();
 HRESULT InitMesh();
@@ -31,9 +16,7 @@ void CleanupDevice();
 LRESULT CALLBACK WndProc( HWND, UINT, WPARAM, LPARAM );
 void Render();
 
-//--------------------------------------------------------------------------------------
-// Global Variables
-//--------------------------------------------------------------------------------------
+#pragma region GLOBAL_VARIABLES
 HINSTANCE g_hInst = nullptr;
 HWND g_hWnd = nullptr;
 D3D_DRIVER_TYPE g_driverType = D3D_DRIVER_TYPE_NULL;
@@ -69,11 +52,8 @@ vecDrawables g_GameObjects;
 Background g_background;
 AIManager g_AIManager;
 ImGuiManager imgui;
+#pragma endregion
 
-//--------------------------------------------------------------------------------------
-// Entry point to the program. Initializes everything and goes into a message processing 
-// loop. Idle time is used to render the scene.
-//--------------------------------------------------------------------------------------
 int WINAPI wWinMain( _In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow )
 {
     UNREFERENCED_PARAMETER( hPrevInstance );
@@ -108,9 +88,6 @@ int WINAPI wWinMain( _In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
     return ( int )msg.wParam;
 }
 
-//--------------------------------------------------------------------------------------
-// Register class and create window
-//--------------------------------------------------------------------------------------
 HRESULT InitWindow( HINSTANCE hInstance, int nCmdShow )
 {
     // Register class
@@ -151,11 +128,6 @@ HRESULT InitWindow( HINSTANCE hInstance, int nCmdShow )
     return S_OK;
 }
 
-//--------------------------------------------------------------------------------------
-// Helper for compiling shaders with D3DCompile
-//
-// With VS 11, we could load up prebuilt .cso files instead...
-//--------------------------------------------------------------------------------------
 HRESULT CompileShaderFromFile( const WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut )
 {
     HRESULT hr = S_OK;
@@ -189,10 +161,6 @@ HRESULT CompileShaderFromFile( const WCHAR* szFileName, LPCSTR szEntryPoint, LPC
     return S_OK;
 }
 
-
-//--------------------------------------------------------------------------------------
-// Create Direct3D device and swap chain
-//--------------------------------------------------------------------------------------
 HRESULT InitDevice()
 {
     HRESULT hr = S_OK;
@@ -381,7 +349,7 @@ HRESULT InitDevice()
 	}
 
     // create the background (racetrack) 
-    hr = g_background.initMesh( g_pd3dDevice );
+    hr = g_background.InitMesh( g_pd3dDevice );
     if ( FAILED( hr ) )
     {
         MessageBox( nullptr,
@@ -398,14 +366,11 @@ HRESULT InitDevice()
     return S_OK;
 }
 
-// ***************************************************************************************
-// InitMesh
-// ***************************************************************************************
 HRESULT InitMesh()
 {
 	// Compile the vertex shader
 	ID3DBlob* pVSBlob = nullptr;
-	HRESULT hr = CompileShaderFromFile( L"Resources\\Shaders\\shader.fx", "VS", "vs_4_0", &pVSBlob );
+	HRESULT hr = CompileShaderFromFile( L"Resources\\shader.fx", "VS", "vs_4_0", &pVSBlob );
 	if ( FAILED( hr ) )
 	{
 		MessageBox( nullptr,
@@ -444,7 +409,7 @@ HRESULT InitMesh()
 
 	// Compile the pixel shader
 	ID3DBlob* pPSBlob = nullptr;
-	hr = CompileShaderFromFile( L"Resources\\Shaders\\shader.fx", "PS", "ps_4_0", &pPSBlob );
+	hr = CompileShaderFromFile( L"Resources\\shader.fx", "PS", "ps_4_0", &pPSBlob );
 	if ( FAILED( hr ) )
 	{
 		MessageBox( nullptr,
@@ -470,11 +435,10 @@ HRESULT InitMesh()
 	return hr;
 }
 
-// ***************************************************************************************
-// InitWorld
-// ***************************************************************************************
 HRESULT InitWorld( int width, int height )
 {
+    DirectX::XMFLOAT4 g_EyePosition( 0, 0, -200, 1 );
+
 	// Initialize the view matrix
 	XMVECTOR Eye = XMLoadFloat4( &g_EyePosition );
 	XMVECTOR At = XMVectorSet( 0.0f, 0.0f, 0.0f, 0.0f );
@@ -487,9 +451,6 @@ HRESULT InitWorld( int width, int height )
 	return S_OK;
 }
 
-//--------------------------------------------------------------------------------------
-// Clean up the objects we've created
-//--------------------------------------------------------------------------------------
 void CleanupDevice()
 {
     if( g_pConstantBuffer ) g_pConstantBuffer->Release();
@@ -502,9 +463,6 @@ void CleanupDevice()
     if( g_pSwapChain ) g_pSwapChain->Release();
 }
 
-//--------------------------------------------------------------------------------------
-// Called every time the application receives a message
-//--------------------------------------------------------------------------------------
 extern LRESULT ImGui_ImplWin32_WndProcHandler( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
@@ -561,7 +519,7 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam 
     return 0;
 }
 
-void setupTransformConstantBuffer( XMMATRIX world, XMMATRIX view, XMMATRIX projection )
+void SetupTransformConstantBuffer( XMMATRIX world, XMMATRIX view, XMMATRIX projection )
 {
 	ConstantBuffer cb1;
 	cb1.mWorld = XMMatrixTranspose( world );
@@ -573,13 +531,13 @@ void setupTransformConstantBuffer( XMMATRIX world, XMMATRIX view, XMMATRIX proje
 
 void DrawItem( DrawableGameObject* object )
 {
-    setupTransformConstantBuffer( XMLoadFloat4x4( object->getTransform() ), g_View, g_Projection );
+    SetupTransformConstantBuffer( XMLoadFloat4x4( object->GetTransform() ), g_View, g_Projection );
     g_pImmediateContext->VSSetConstantBuffers( 0, 1, &g_pConstantBuffer );
-    g_pImmediateContext->PSSetShaderResources( 0, 1, object->getTextureResourceView() );
-    g_pImmediateContext->PSSetSamplers( 0, 1, object->getTextureSamplerState() );
+    g_pImmediateContext->PSSetShaderResources( 0, 1, object->GetTextureResourceView() );
+    g_pImmediateContext->PSSetSamplers( 0, 1, object->GetTextureSamplerState() );
 
     // draw 
-    object->draw( g_pImmediateContext );
+    object->Draw( g_pImmediateContext );
 }
 
 void AddItemToDrawList( DrawableGameObject* object )
@@ -594,9 +552,6 @@ void Update( const float deltaTime )
     g_AIManager.Update( deltaTime );
 }
 
-//--------------------------------------------------------------------------------------
-// Render a frame
-//--------------------------------------------------------------------------------------
 void Render()
 {
     // Update our time
@@ -619,10 +574,10 @@ void Render()
     g_pImmediateContext->PSSetShader( g_pPixelShader, nullptr, 0 );
 
     // draw the background
-    setupTransformConstantBuffer( XMLoadFloat4x4( g_background.getTransform() ), XMMatrixIdentity(), XMMatrixIdentity() );
-    g_pImmediateContext->PSSetShaderResources( 0, 1, g_background.getTextureResourceView() );
-    g_pImmediateContext->PSSetSamplers( 0, 1, g_background.getTextureSamplerState() );
-    g_background.draw( g_pd3dDevice, g_pImmediateContext );
+    SetupTransformConstantBuffer( XMLoadFloat4x4( g_background.GetTransform() ), XMMatrixIdentity(), XMMatrixIdentity() );
+    g_pImmediateContext->PSSetShaderResources( 0, 1, g_background.GetTextureResourceView() );
+    g_pImmediateContext->PSSetSamplers( 0, 1, g_background.GetTextureSamplerState() );
+    g_background.Draw( g_pd3dDevice, g_pImmediateContext );
     
     // draw the vehicles / nodes
 	for( uint32_t i = 0; i < g_GameObjects.size(); i++ ) 

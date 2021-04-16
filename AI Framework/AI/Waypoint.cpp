@@ -35,11 +35,10 @@ HRESULT	Waypoint::initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, con
 	}
 	else {
 		m_isOnTrack = false;
-		float s = 10;
-		m_scale = { s, s };
+		m_vScale = { 10.0f, 10.0f };
 		SetTextureName( L"Resources\\Textures\\blue.dds" );
 	}
 
-	HRESULT hr = DrawableGameObject::initMesh( pd3dDevice );
+	HRESULT hr = DrawableGameObject::InitMesh( pd3dDevice );
 	return hr;
 }

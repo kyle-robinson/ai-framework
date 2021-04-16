@@ -19,16 +19,16 @@ typedef std::vector<Obstacle*> vecObstacles;
 typedef std::vector<Waypoint*> vecWaypoints;
 typedef std::vector<PickupItem*> vecPickups;
 
-inline bool PointInCircle( Vector2D Pos, double radius, Vector2D p )
+inline bool PointInCircle( Vector2D Pos, float radius, Vector2D p )
 {
-	double DistFromCenterSquared = ( p - Pos ).LengthSq();
+	float DistFromCenterSquared = ( p - Pos ).LengthSq();
 	if ( DistFromCenterSquared < ( radius * radius ) )
 		return true;
 	return false;
 }
 
 template <class T, class conT>
-void TagNeighbors( const T& entity, conT& ContainerOfEntities, double radius )
+void TagNeighbors( const T& entity, conT& ContainerOfEntities, float radius )
 {
 	//iterate through all entities checking for range
 	for ( typename conT::iterator curEntity = ContainerOfEntities.begin();
@@ -42,7 +42,7 @@ void TagNeighbors( const T& entity, conT& ContainerOfEntities, double radius )
 
 		//the bounding radius of the other is taken into account by adding it 
 		//to the range
-		double range = radius + ( *curEntity )->GetBoundingRadius();
+		float range = radius + ( *curEntity )->GetBoundingRadius();
 
 		//if entity within range, tag for further consideration. (working in
 		//distance-squared space to avoid sqrts)
@@ -63,9 +63,9 @@ public:
 	void CreateObstacles();
 	
 	Vector2D GetCrosshair() const noexcept { return m_crosshair; }
-	void SetCrosshair( const double x, const double y ) noexcept
+	void SetCrosshair( const float x, const float y ) noexcept
 	{
-		Vector2D ProposedPosition( ( double )x, ( double )y );
+		Vector2D ProposedPosition( x, y );
 		for ( vecDrawables::iterator curOb = m_obstacles.begin(); curOb != m_obstacles.end(); ++curOb )
 		{
 			if ( PointInCircle( ( *curOb )->GetPosition(), ( *curOb )->GetBoundingRadius(), ProposedPosition ) )
@@ -85,7 +85,7 @@ public:
 	vecWaypoints GetWaypoints() const noexcept { return m_waypoints; }
 	vecDrawables GetObstacles() noexcept { return m_obstacles; }
 
-	void  TagObstaclesWithinViewRange( DrawableGameObject* pVehicle, double range )
+	void  TagObstaclesWithinViewRange( DrawableGameObject* pVehicle, float range )
 	{
 		TagNeighbors( pVehicle, m_obstacles, range );
 	}

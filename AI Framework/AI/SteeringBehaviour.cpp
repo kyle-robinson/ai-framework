@@ -1,88 +1,8 @@
 #include "SteeringBehaviour.h"
+#include "Math/Transformations.h"
 #include "AIManager.h"
 
-inline Vector2D PointToWorldSpace( const Vector2D& point,
-    const Vector2D& AgentHeading,
-    const Vector2D& AgentSide,
-    const Vector2D& AgentPosition )
-{
-    //make a copy of the point
-    Vector2D TransPoint = point;
-
-    //create a transformation matrix
-    C2DMatrix matTransform;
-
-    //rotate
-    matTransform.Rotate( AgentHeading, AgentSide );
-
-    //and translate
-    matTransform.Translate( AgentPosition.x, AgentPosition.y );
-
-    //now transform the vertices
-    matTransform.TransformVector2Ds( TransPoint );
-
-    return TransPoint;
-}
-
-inline Vector2D PointToLocalSpace( const Vector2D& point,
-    const Vector2D& AgentHeading,
-    const Vector2D& AgentSide,
-    const Vector2D& AgentPosition )
-{
-
-    //make a copy of the point
-    Vector2D TransPoint = point;
-
-    //create a transformation matrix
-    C2DMatrix matTransform;
-
-    double Tx = -AgentPosition.Dot( AgentHeading );
-    double Ty = -AgentPosition.Dot( AgentSide );
-
-    //create the transformation matrix
-    matTransform._11( AgentHeading.x ); matTransform._12( AgentSide.x );
-    matTransform._21( AgentHeading.y ); matTransform._22( AgentSide.y );
-    matTransform._31( Tx );           matTransform._32( Ty );
-
-    //now transform the vertices
-    matTransform.TransformVector2Ds( TransPoint );
-
-    return TransPoint;
-}
-
-inline Vector2D VectorToWorldSpace( const Vector2D& vec,
-    const Vector2D& AgentHeading,
-    const Vector2D& AgentSide )
-{
-    //make a copy of the point
-    Vector2D TransVec = vec;
-
-    //create a transformation matrix
-    C2DMatrix matTransform;
-
-    //rotate
-    matTransform.Rotate( AgentHeading, AgentSide );
-
-    //now transform the vertices
-    matTransform.TransformVector2Ds( TransVec );
-
-    return TransVec;
-}
-
-SteeringBehaviour::SteeringBehaviour( Vehicle* vehicle ) :
-	m_pVehicle( vehicle ),
-    m_pTargetAgent( nullptr ),
-	m_iFlags( 0 ),
-	m_dWeightArrive( 1.0 ),
-	m_deceleration( NORMAL ),
-    m_dWeightWander( 10.0 ),
-    m_dWanderDistance( 10.0 ),
-    m_dWanderJitter( 200.0 ),
-    m_dWanderRadius( 10.0 ),
-    m_dWeightFlee( 1.0 ),
-    m_dWeightSeek( 1.0 ),
-    m_dWeightPursuit( 1.0 ),
-    m_dWeightObstacleAvoidance( 10.0 )
+SteeringBehaviour::SteeringBehaviour( Vehicle* vehicle ) : m_pVehicle( vehicle )
 {
     double theta = RandFloat() * TwoPi;
     m_vWanderTarget = Vector2D( m_dWanderRadius * cos( theta ), m_dWanderRadius * sin( theta ) );
@@ -116,7 +36,7 @@ Vector2D SteeringBehaviour::Calculate()
 
     if ( On( ARRIVE ) )
     {
-        force = Arrive( m_pVehicle->World()->GetCrosshair(), m_deceleration ) * m_dWeightArrive;
+        force = Arrive( m_pVehicle->World()->GetCrosshair(), m_eDeceleration ) * m_dWeightArrive;
         if ( !AccumulateForce( m_vSteeringForce, force ) )
             return m_vSteeringForce;
     }

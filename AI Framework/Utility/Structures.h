@@ -2,12 +2,12 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
 
-#include <vector>
+#include <DirectXMath.h>
 using namespace DirectX;
 
 class DrawableGameObject;
-class Waypoint;
 class PickupItem;
+class Waypoint;
 
 struct ConstantBuffer
 {
@@ -18,9 +18,9 @@ struct ConstantBuffer
 
 struct SimpleVertex
 {
-	XMFLOAT3 Pos;
-	XMFLOAT3 Normal;
-	XMFLOAT2 TexCoord;
+	XMFLOAT3 fPosition;
+	XMFLOAT3 fNormal;
+	XMFLOAT2 fTexCoord;
 };
 
 #endif

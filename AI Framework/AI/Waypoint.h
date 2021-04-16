@@ -3,6 +3,7 @@
 #define WAYPOINT_H
 
 #include "DrawableGameObject.h"
+#include <vector>
 
 class Waypoint : public DrawableGameObject
 {

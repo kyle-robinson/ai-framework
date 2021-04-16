@@ -28,32 +28,29 @@ Vehicle::Vehicle(
 	m_pSteering = new SteeringBehaviour( this );
 }
 
-HRESULT	Vehicle::InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, const std::wstring& texturePath )
+HRESULT	Vehicle::InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> device, const std::wstring& texturePath )
 {
-	m_scale = { 30, 20 };
+	m_vScale = { 30, 20 };
 	SetTextureName( texturePath );
-	return DrawableGameObject::initMesh( pd3dDevice );
+	return DrawableGameObject::InitMesh( device );
 }
 
-void Vehicle::Update( const float deltaTime )
+void Vehicle::Update( const float dt )
 {
-	m_dTimeElapsed = deltaTime;
+	m_fTimeElapsed = dt;
+	Vector2D currentPos = GetPosition();
 
-	Vector2D OldPos = GetPosition();
-
-	// calculate the net force for each steering behaviour
-	Vector2D SteeringForce;
-	SteeringForce = m_pSteering->Calculate();
+	// calculate net force
+	Vector2D steeringForce;
+	steeringForce = m_pSteering->Calculate();
 
 	// a = f / m
-	Vector2D acceleration = SteeringForce / m_dMass;
-	m_vVelocity += acceleration * deltaTime;
-
-	// ensure vehicle does not exceed maximum velocity
-	m_vVelocity.Truncate( m_dMaxSpeed );
+	Vector2D acceleration = steeringForce / m_fMass;
+	m_vVelocity += acceleration * dt;
 
 	// update the position
-	m_position += m_vVelocity * deltaTime;
+	m_vVelocity.Truncate( m_fMaxSpeed );
+	m_vPosition += m_vVelocity * dt;
 
 	// update the heading if the vehicle has a non zero velocity
 	if ( m_vVelocity.LengthSq() > 0.00000001 )
@@ -67,18 +64,18 @@ void Vehicle::Update( const float deltaTime )
 	GetClientRect( m_pWorld->GetHWND(), &rect );
 	int cxClient = rect.right;
 	int cyClient = rect.bottom;
-	WrapAround( m_position, cxClient / 2, cyClient / 2 );
+	WrapAround( m_vPosition, cxClient / 2, cyClient / 2 );
 
 	// update the vehicle's rotation
 	Vector2D diff;
-	diff.x = m_position.x - OldPos.x;
-	diff.y = m_position.y - OldPos.y;
+	diff.x = m_vPosition.x - currentPos.x;
+	diff.y = m_vPosition.y - currentPos.y;
 	if ( diff.Length() > 0.0f )
 	{
 		diff.Normalize();
-		m_radianRotation = atan2f( diff.y, diff.x );
+		m_fRadianRotation = atan2f( diff.y, diff.x );
 	}
 
-	// update the vehicle's position/rotation/scale matrices
-	DrawableGameObject::update( deltaTime );
+	// update vehicle's matrices
+	DrawableGameObject::Update( dt );
 }

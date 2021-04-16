@@ -1,44 +1,12 @@
 #include "AIManager.h"
-#include "PathFinder.h"
-#include "ErrorLogger.h"
-#include "PickupItem.h"
+#include "EntityTemplates.h"
+#include "Logging/ErrorLogger.h"
 #include "SteeringBehaviour.h"
-#include <sstream>
+#include "PickupItem.h"
+#include "PathFinder.h"
 #include "main.h"
+#include <sstream>
 #include <imgui/imgui.h>
-
-inline bool TwoCirclesOverlapped( Vector2D c1, double r1,
-    Vector2D c2, double r2 )
-{
-    double DistBetweenCenters = sqrt( ( c1.x - c2.x ) * ( c1.x - c2.x ) +
-        ( c1.y - c2.y ) * ( c1.y - c2.y ) );
-
-    if ( ( DistBetweenCenters < ( r1 + r2 ) ) || ( DistBetweenCenters < fabs( r1 - r2 ) ) )
-    {
-        return true;
-    }
-
-    return false;
-}
-
-template <class T, class conT>
-bool Overlapped( const T* ob, const conT& conOb, double MinDistBetweenObstacles = 40.0 )
-{
-    typename conT::const_iterator it;
-
-    for ( it = conOb.begin(); it != conOb.end(); ++it )
-    {
-        if ( TwoCirclesOverlapped( ob->GetPosition(),
-            ob->GetBoundingRadius() + MinDistBetweenObstacles,
-            ( *it )->GetPosition(),
-            ( *it )->GetBoundingRadius() ) )
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
 
 Waypoint* AIManager::GetWaypoint( const int x, const int y )
 {
@@ -195,16 +163,18 @@ void AIManager::Update( const float fDeltaTime )
         AddItemToDrawList( m_pickups[i] );
     }*/
 
-    // cars
+    // update objects
     if ( !IsPaused() )
     {
         m_pCarBlue->Update( fDeltaTime );
         if ( m_bEnableRedCar )
             m_pCarRed->Update( fDeltaTime );
+
         for ( uint32_t i = 0; i < m_obstacles.size(); i++ )
-            m_obstacles[i]->update( fDeltaTime );
+            m_obstacles[i]->Update( fDeltaTime );
     }
 
+    // render objects
     AddItemToDrawList( m_pCarBlue );
     if ( m_bEnableRedCar )
         AddItemToDrawList( m_pCarRed );
@@ -272,7 +242,7 @@ bool AIManager::checkForCollisions( Vehicle* car )
     XMVECTOR carPos;
     XMVECTOR carScale;
     XMMatrixDecompose( &carScale, &dummy, &carPos,
-        XMLoadFloat4x4( car->getTransform() )
+        XMLoadFloat4x4( car->GetTransform() )
     );
 
     XMFLOAT3 scale;
@@ -285,7 +255,7 @@ bool AIManager::checkForCollisions( Vehicle* car )
     XMVECTOR puPos;
     XMVECTOR puScale;
     XMMatrixDecompose( &puScale, &dummy, &puPos,
-        XMLoadFloat4x4( m_pickups[0]->getTransform() )
+        XMLoadFloat4x4( m_pickups[0]->GetTransform() )
     );
 
     XMStoreFloat3( &scale, puScale );
