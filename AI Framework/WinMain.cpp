@@ -90,17 +90,25 @@ HRESULT InitWindow( HINSTANCE hInstance, int nCmdShow )
     g_hInst = hInstance;
     int width = SCREEN_WIDTH;
     int height = SCREEN_HEIGHT;
-    RECT rc = { 0, 0, width, height };
+    int centerScreenX = GetSystemMetrics( SM_CXSCREEN ) / 2 - width / 2;
+    int centerScreenY = GetSystemMetrics( SM_CYSCREEN ) / 2 - height / 2;
 
-    AdjustWindowRect( &rc, WS_OVERLAPPEDWINDOW, FALSE );
+    RECT windowRect;
+    windowRect.left = centerScreenX;
+    windowRect.top = centerScreenY;
+    windowRect.right = windowRect.left + width;
+    windowRect.bottom = windowRect.top + height;
+    AdjustWindowRect( &windowRect, WS_OVERLAPPEDWINDOW, FALSE );
+
+    AdjustWindowRect( &windowRect, WS_OVERLAPPEDWINDOW, FALSE );
     g_hWnd = CreateWindow(
         L"TutorialWindowClass",
         L"DirectX 11 Artificial Intelligence Framework",
         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-        CW_USEDEFAULT,
-        CW_USEDEFAULT,
-        rc.right - rc.left,
-        rc.bottom - rc.top,
+        windowRect.left,
+        windowRect.top,
+        windowRect.right - windowRect.left,
+        windowRect.bottom - windowRect.top,
         nullptr,
         nullptr,
         hInstance,

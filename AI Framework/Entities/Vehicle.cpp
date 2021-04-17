@@ -5,12 +5,12 @@
 Vehicle::Vehicle(
 		AIManager* aiManager,
 		Vector2D position,
-		double rotation,
+		float rotation,
 		Vector2D velocity,
-		double mass,
-		double maxForce,
-		double maxSpeed,
-		double maxTurnRate
+		float mass,
+		float maxForce,
+		float maxSpeed,
+		float maxTurnRate
 	)
 	:
 	MovingEntity(
@@ -28,11 +28,11 @@ Vehicle::Vehicle(
 	m_pSteering = new SteeringBehaviour( this );
 }
 
-HRESULT	Vehicle::InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> device, const std::wstring& texturePath )
+HRESULT	Vehicle::InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> pDevice, const std::wstring& texturePath )
 {
 	m_vScale = { 30, 20 };
 	SetTextureName( texturePath );
-	return DrawableGameObject::InitMesh( device );
+	return DrawableGameObject::InitMesh( pDevice );
 }
 
 void Vehicle::Update( const float dt )

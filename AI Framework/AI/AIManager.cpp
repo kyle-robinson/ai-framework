@@ -14,17 +14,17 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> d
     this->height = height;
     this->m_pDevice = device;
     
-    // create a pickup item ----------------------------------------------
-    //PickupItem* pPickup = new PickupItem();
-    //HRESULT hr = pPickup->initMesh( pd3dDevice );
-    //m_pickups.push_back( pPickup );
+    // create pickups
+    PickupItem* pPickup = new PickupItem( 100, 200, 10 );
+    HRESULT hr = pPickup->InitMesh( device );
+    m_pickups.push_back( pPickup );
 
     // create vehicles
-    m_pCarBlue = new Vehicle( this, { 0.0, 0.0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 20.0 );
-    HRESULT hr = m_pCarBlue->InitMesh( device.Get(), L"Resources\\Textures\\car_blue.dds" );
+    m_pCarBlue = new Vehicle( this, { 0, 0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50, 150, 20 );
+    hr = m_pCarBlue->InitMesh( device.Get(), L"Resources\\Textures\\car_blue.dds" );
     m_pCarBlue->Steering()->WanderOn();
 
-    m_pCarRed = new Vehicle( this, { 0.0, 0.0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 20.0 );
+    m_pCarRed = new Vehicle( this, { 0, 0 }, RandFloat() * TwoPi, { 0, 0 }, 1, 50, 150, 20 );
     hr = m_pCarRed->InitMesh( device.Get(), L"Resources\\Textures\\car_red.dds" );
     m_pCarRed->Steering()->PursuitOn( m_pCarBlue );
 
@@ -56,19 +56,20 @@ void AIManager::CreateObstacles()
     {
         bool overlapped = true;
         bool bOverlapped = true;
-        int NumAllowableTrys = 2000;
-        int NumTrys = 0;
+        int allowableTrys = 2000;
+        int numTrys = 0;
 
         while ( bOverlapped )
         {
-            NumTrys++;
-            if ( NumTrys > NumAllowableTrys ) return;
+            numTrys++;
+            if ( numTrys > allowableTrys ) return;
 
             RECT rect;
             GetClientRect( GetHWND(), &rect );
             int cxClient = rect.right;
             int cyClient = rect.bottom;
 
+            // randomly place obstacles
             int radius = 50;
             const int border = 10;
             Obstacle* ob = new Obstacle(
@@ -77,7 +78,7 @@ void AIManager::CreateObstacles()
                 radius
             );
 
-            HRESULT hr = ob->InitMesh( m_pDevice.Get(), L"Resources\\Textures\\tyre.dds" );
+            HRESULT hr = ob->InitMesh( m_pDevice.Get() );
             if ( FAILED( hr ) ) return;
 
             const int minimumGap = 20;
@@ -108,35 +109,46 @@ void AIManager::Update( const float dt )
 
     //vecWaypoints neighbours = GetNeighbours( 19, 10 );
     for ( uint32_t i = 0; i < neighbours.size(); i++ )
-        AddItemToDrawList( neighbours[i] );
+        AddItemToDrawList( neighbours[i] );*/
 
-    // pickups
-    for ( uint32_t i = 0; i < m_pickups.size(); i++ )
+    // UPDATE
     {
-        m_pickups[i]->update( fDeltaTime );
-        AddItemToDrawList( m_pickups[i] );
-    }*/
+        // cars
+        if ( !IsPaused() )
+        {
+            m_pCarBlue->Update( dt );
+            CheckForCollisions( m_pCarBlue );
+            if ( m_bEnableRedCar )
+                m_pCarRed->Update( dt );
+        }
 
-    // update objects
-    if ( !IsPaused() )
-    {
-        m_pCarBlue->Update( dt );
-        if ( m_bEnableRedCar )
-            m_pCarRed->Update( dt );
-
+        // obstacles
         for ( uint32_t i = 0; i < m_obstacles.size(); i++ )
             m_obstacles[i]->Update( dt );
+
+        // pickups
+        for ( uint32_t i = 0; i < m_pickups.size(); i++ )
+            m_pickups[i]->Update( dt );
     }
 
-    // render objects
-    AddItemToDrawList( m_pCarBlue );
-    if ( m_bEnableRedCar )
-        AddItemToDrawList( m_pCarRed );
+    // RENDER
+    {
+        // cars
+        AddItemToDrawList( m_pCarBlue );
+        if ( m_bEnableRedCar )
+            AddItemToDrawList( m_pCarRed );
 
-    for ( uint32_t i = 0; i < m_obstacles.size(); i++ )
-        AddItemToDrawList( m_obstacles[i] );
+        // obstacles
+        for ( uint32_t i = 0; i < m_obstacles.size(); i++ )
+            AddItemToDrawList( m_obstacles[i] );
 
-    SpawnControlWindow();
+        // pickups
+        for ( uint32_t i = 0; i < m_pickups.size(); i++ )
+            AddItemToDrawList( m_pickups[i] );
+
+        // imgui
+        SpawnControlWindow();
+    }
 }
 
 /*void AIManager::LeftMouseUp( const int x, const int y )

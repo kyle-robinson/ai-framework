@@ -22,14 +22,6 @@ typedef std::vector<Obstacle*> vecObstacles;
 typedef std::vector<Waypoint*> vecWaypoints;
 typedef std::vector<PickupItem*> vecPickups;
 
-inline bool PointInCircle( Vector2D Pos, float radius, Vector2D p )
-{
-	float DistFromCenterSquared = ( p - Pos ).LengthSq();
-	if ( DistFromCenterSquared < ( radius * radius ) )
-		return true;
-	return false;
-}
-
 class AIManager
 {
 public:
@@ -38,35 +30,33 @@ public:
 	void HandleKeyPresses( WPARAM param );
 	void CreateObstacles();
 	
+	// crosshair
 	Vector2D GetCrosshair() const noexcept { return m_crosshair; }
 	void SetCrosshair( const float x, const float y ) noexcept
 	{
-		Vector2D ProposedPosition( x, y );
+		Vector2D posToMoveTo( x, y );
 		for ( vecDrawables::iterator curOb = m_obstacles.begin(); curOb != m_obstacles.end(); ++curOb )
 		{
-			if ( PointInCircle( ( *curOb )->GetPosition(), ( *curOb )->GetBoundingRadius(), ProposedPosition ) )
-			{
+			// prevent moving to a space occupied by an obstacle
+			if ( PointInCircle( ( *curOb )->GetPosition(), ( *curOb )->GetBoundingRadius(), posToMoveTo ) )
 				return;
-			}
 		}
 		m_crosshair = { x, y };
 	}
 
-	HWND GetHWND() const noexcept { return hWnd; }
-	int GetScreenX() const noexcept { return width; }
-	int GetScreenY() const noexcept { return height; }
-
+	// objects
 	Waypoint* GetWaypoint( const int x, const int y );
 	vecWaypoints GetNeighbours( const int x, const int y );
 	vecWaypoints GetWaypoints() const noexcept { return m_waypoints; }
 	vecDrawables GetObstacles() noexcept { return m_obstacles; }
 
-	void TagObstaclesWithinViewRange( DrawableGameObject* pVehicle, float range )
-	{
-		TagNeighbors( pVehicle, m_obstacles, range );
-	}
-
+	// utility
 	void SpawnControlWindow();
+	HWND GetHWND() const noexcept { return hWnd; }
+	int GetScreenX() const noexcept { return width; }
+	int GetScreenY() const noexcept { return height; }
+	void TagObstaclesWithinViewRange( DrawableGameObject* pVehicle, float range )
+		{ TagNeighbors( pVehicle, m_obstacles, range ); }
 protected:
 	bool CheckForCollisions( Vehicle* car );
 private:

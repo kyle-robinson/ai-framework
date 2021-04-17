@@ -61,6 +61,15 @@ inline bool InRange( double start, double end, double val )
 	}
 }
 
+// returns true if point is found within circle
+inline bool PointInCircle( Vector2D Pos, float radius, Vector2D p )
+{
+	float DistFromCenterSquared = ( p - Pos ).LengthSq();
+	if ( DistFromCenterSquared < ( radius* radius ) )
+		return true;
+	return false;
+}
+
 template <class T>
 T Maximum( const T& v1, const T& v2 )
 {

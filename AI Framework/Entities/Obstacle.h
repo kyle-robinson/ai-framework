@@ -14,15 +14,11 @@ public:
 		DrawableGameObject( pos, r )
 	{}
 	
-	HRESULT	InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> device, const std::wstring& texturePath )
+	HRESULT	InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> pDevice )
 	{
 		m_vScale = { 30, 30 };
-		SetTextureName( texturePath );
-		return DrawableGameObject::InitMesh( device );
-	}
-	void Update( const float dt )
-	{
-		DrawableGameObject::Update( dt );
+		SetTextureName( L"Resources\\Textures\\tyre.dds" );
+		return DrawableGameObject::InitMesh( pDevice );
 	}
 };
 

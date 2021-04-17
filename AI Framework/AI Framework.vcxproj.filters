@@ -90,9 +90,6 @@
     <ClCompile Include="Entities\Background.cpp">
       <Filter>Source\Entities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\PickupItem.cpp">
-      <Filter>Source\Entities</Filter>
-    </ClCompile>
     <ClCompile Include="Entities\Vehicle.cpp">
       <Filter>Source\Entities</Filter>
     </ClCompile>

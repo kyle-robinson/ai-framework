@@ -5,7 +5,8 @@
 DrawableGameObject::DrawableGameObject( Vector2D position, float radius ) :
 	m_vPosition( position ),
 	m_fBoundingRadius( radius ),
-	m_vScale( { 10.0f, 10.0f } )
+	m_vScale( { 10.0f, 10.0f } ),
+	m_fRadianRotation( 0.0f )
 {
 	XMStoreFloat4x4( &m_mWorld, DirectX::XMMatrixIdentity() );
 }

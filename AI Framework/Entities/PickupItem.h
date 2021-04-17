@@ -7,7 +7,19 @@
 class PickupItem : public DrawableGameObject
 {
 public:
-    virtual HRESULT initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice );
+	PickupItem( float x, float y, float r ) :
+		DrawableGameObject( { x, y }, r )
+	{}
+	PickupItem( Vector2D pos, float r ) :
+		DrawableGameObject( pos, r )
+	{}
+
+    HRESULT InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> pDevice )
+	{
+		m_vScale = { 20, 20 };
+		SetTextureName( L"Resources\\Textures\\pickup.dds" );
+		return DrawableGameObject::InitMesh( pDevice );
+	}
 };
 
 #endif

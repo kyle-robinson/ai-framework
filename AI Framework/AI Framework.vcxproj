@@ -37,7 +37,6 @@
     <ClCompile Include="AI\SteeringBehaviour.cpp" />
     <ClCompile Include="AI\Waypoint.cpp" />
     <ClCompile Include="Entities\Background.cpp" />
-    <ClCompile Include="Entities\PickupItem.cpp" />
     <ClCompile Include="Entities\Vehicle.cpp" />
     <ClCompile Include="Graphics\Graphics.cpp" />
     <ClCompile Include="Graphics\ImGuiManager.cpp" />

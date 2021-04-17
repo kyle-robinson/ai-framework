@@ -13,16 +13,16 @@ public:
 	Vehicle(
 		AIManager* aiManager,
 		Vector2D position,
-		double rotation,
+		float rotation,
 		Vector2D velocity,
-		double mass,
-		double maxForce,
-		double maxSpeed,
-		double maxTurnRate
+		float mass,
+		float maxForce,
+		float maxSpeed,
+		float maxTurnRate
 	);
 	HRESULT InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> device, const std::wstring& texturePath );
 	void Update( const float dt ) override;
-	double GetDeltaTime() const noexcept { return m_fTimeElapsed; }
+	float GetDeltaTime() const noexcept { return m_fTimeElapsed; }
 
 	AIManager* const World() const noexcept { return m_pWorld; }
 	SteeringBehaviour* const Steering() const noexcept { return m_pSteering; }
