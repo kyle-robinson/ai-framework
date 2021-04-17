@@ -39,12 +39,15 @@
     <ClCompile Include="Entities\Background.cpp" />
     <ClCompile Include="Entities\PickupItem.cpp" />
     <ClCompile Include="Entities\Vehicle.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Graphics\Graphics.cpp" />
+    <ClCompile Include="Graphics\ImGuiManager.cpp" />
+    <ClCompile Include="Graphics\Shaders.cpp" />
+    <ClCompile Include="WinMain.cpp" />
     <ClCompile Include="Model\DDSTextureLoader.cpp" />
     <ClCompile Include="Model\DrawableGameObject.cpp" />
-    <ClCompile Include="Utility\ImGuiManager.cpp" />
     <ClCompile Include="Utility\Logging\ErrorLogger.cpp" />
     <ClCompile Include="Utility\Logging\StringConverter.cpp" />
+    <ClCompile Include="Utility\Logging\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\External\imgui\imconfig.h" />
@@ -64,20 +67,30 @@
     <ClInclude Include="Entities\Obstacle.h" />
     <ClInclude Include="Entities\PickupItem.h" />
     <ClInclude Include="Entities\Vehicle.h" />
-    <ClInclude Include="main.h" />
+    <ClInclude Include="Graphics\DepthStencil.h" />
+    <ClInclude Include="Graphics\Graphics.h" />
+    <ClInclude Include="Graphics\GraphicsResource.h" />
+    <ClInclude Include="Graphics\ImGuiManager.h" />
+    <ClInclude Include="Graphics\Rasterizer.h" />
+    <ClInclude Include="Graphics\RenderTarget.h" />
+    <ClInclude Include="Graphics\Sampler.h" />
+    <ClInclude Include="Graphics\Shaders.h" />
+    <ClInclude Include="Graphics\SwapChain.h" />
+    <ClInclude Include="Graphics\Viewport.h" />
     <ClInclude Include="Model\DDSTextureLoader.h" />
     <ClInclude Include="Model\DrawableGameObject.h" />
     <ClInclude Include="Resources\resource.h" />
     <ClInclude Include="Utility\EntityTemplates.h" />
-    <ClInclude Include="Utility\ImGuiManager.h" />
     <ClInclude Include="Utility\Logging\COMException.h" />
     <ClInclude Include="Utility\Logging\ErrorLogger.h" />
     <ClInclude Include="Utility\Logging\StringConverter.h" />
+    <ClInclude Include="Utility\Logging\Timer.h" />
     <ClInclude Include="Utility\Math\C2DMatrix.h" />
     <ClInclude Include="Utility\Math\Transformations.h" />
     <ClInclude Include="Utility\Math\Vector2D.h" />
     <ClInclude Include="Utility\Structures.h" />
     <ClInclude Include="Utility\Utility.h" />
+    <ClInclude Include="WinMain.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Textures\blue.dds" />
@@ -163,7 +176,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
-    <IncludePath>$(ProjectDir);$(ProjectDir)Utility;$(ProjectDir)Model;$(ProjectDir)Entities;$(ProjectDir)AI;$(SolutionDir)External;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)Window;$(ProjectDir)Graphics;$(ProjectDir)Utility;$(ProjectDir)Model;$(ProjectDir)Entities;$(ProjectDir)AI;$(SolutionDir)External;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
     <LinkIncremental>true</LinkIncremental>

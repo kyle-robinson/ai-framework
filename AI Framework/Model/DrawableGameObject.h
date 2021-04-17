@@ -19,7 +19,7 @@ public:
 
 	XMFLOAT4X4* GetTransform() { return &m_mWorld; }
 	ID3D11SamplerState** GetTextureSamplerState() { return m_pSamplerLinear.GetAddressOf(); }
-	ID3D11ShaderResourceView** GetTextureResourceView() { return m_pTextureResourceView.GetAddressOf(); 	}
+	ID3D11ShaderResourceView** GetTextureResourceView() { return m_pTextureResourceView.GetAddressOf(); }
 
 	void SetPosition( Vector2D position ) noexcept { m_vPosition = position; }
 	Vector2D GetPosition() const noexcept { return m_vPosition; }

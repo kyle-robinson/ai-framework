@@ -49,9 +49,15 @@
     <Filter Include="Headers\Utility\Logging">
       <UniqueIdentifier>{2f22e412-1c52-4487-a685-3f6601b563f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Headers\Graphics">
+      <UniqueIdentifier>{2f7fa502-0005-4b57-9ae7-e3a29d7d431f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Graphics">
+      <UniqueIdentifier>{e01ae401-d126-410f-b38c-e343af49a2c4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="WinMain.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\External\imgui\imgui.cpp">
@@ -102,14 +108,20 @@
     <ClCompile Include="Utility\Logging\ErrorLogger.cpp">
       <Filter>Source\Utility\Logging</Filter>
     </ClCompile>
-    <ClCompile Include="Utility\ImGuiManager.cpp">
-      <Filter>Source\Utility</Filter>
+    <ClCompile Include="Graphics\Graphics.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Shaders.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Logging\Timer.cpp">
+      <Filter>Source\Utility\Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\ImGuiManager.cpp">
+      <Filter>Source\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="main.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\External\imgui\imconfig.h">
       <Filter>Resources\ImGui</Filter>
     </ClInclude>
@@ -179,9 +191,6 @@
     <ClInclude Include="Utility\Math\Vector2D.h">
       <Filter>Headers\Utility\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Utility\ImGuiManager.h">
-      <Filter>Headers\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="Utility\Structures.h">
       <Filter>Headers\Utility</Filter>
     </ClInclude>
@@ -199,6 +208,42 @@
     </ClInclude>
     <ClInclude Include="Utility\EntityTemplates.h">
       <Filter>Headers\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\SwapChain.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\GraphicsResource.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Graphics.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Shaders.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\DepthStencil.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Rasterizer.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RenderTarget.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Viewport.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Sampler.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\Logging\Timer.h">
+      <Filter>Headers\Utility\Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\ImGuiManager.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="WinMain.h">
+      <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -12,7 +12,6 @@ DrawableGameObject::DrawableGameObject( Vector2D position, float radius ) :
 
 HRESULT DrawableGameObject::InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> device )
 {
-	// vertex buffer
 	SimpleVertex vertices[] =
 	{
 		{ { -1.0f, 1.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f } },
@@ -46,18 +45,6 @@ HRESULT DrawableGameObject::InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> devic
 		{ { -1.0f,  1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f } },
 	};
 
-	D3D11_BUFFER_DESC bd = { 0 };
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof( SimpleVertex ) * ARRAYSIZE( vertices );
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.CPUAccessFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA InitData = {};
-	InitData.pSysMem = vertices;
-	HRESULT hr = device->CreateBuffer( &bd, &InitData, &m_pVertexBuffer );
-	if ( FAILED( hr ) ) return hr;
-
-	// index buffer
 	WORD indices[] =
 	{
 		3,1,0,
@@ -79,6 +66,19 @@ HRESULT DrawableGameObject::InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> devic
 		23,20,22
 	};
 
+	// vertex buffer
+	D3D11_BUFFER_DESC bd = { 0 };
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof( SimpleVertex ) * ARRAYSIZE( vertices );
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA InitData = {};
+	InitData.pSysMem = vertices;
+	HRESULT hr = device->CreateBuffer( &bd, &InitData, &m_pVertexBuffer );
+	if ( FAILED( hr ) ) return hr;
+
+	// index buffer
 	bd.Usage = D3D11_USAGE_DEFAULT;
 	bd.ByteWidth = sizeof( WORD ) * NUM_VERTICES;
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;

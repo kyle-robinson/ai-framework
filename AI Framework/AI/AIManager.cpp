@@ -1,55 +1,18 @@
 #include "AIManager.h"
-#include "EntityTemplates.h"
-#include "Logging/ErrorLogger.h"
-#include "SteeringBehaviour.h"
-#include "PickupItem.h"
 #include "PathFinder.h"
-#include "main.h"
+#include "SteeringBehaviour.h"
+#include "Logging/ErrorLogger.h"
+#include "PickupItem.h"
+#include "WinMain.h"
 #include <sstream>
 #include <imgui/imgui.h>
 
-Waypoint* AIManager::GetWaypoint( const int x, const int y )
-{
-    static bool runOnce = true;
-    bool xOutOfRange = ( x < 0 || x > 19 ) ? true : false;
-    bool yOutOfRange = ( y < 0 || y > 19 ) ? true : false;
-    if ( ( xOutOfRange || yOutOfRange ) && runOnce )
-    {
-        ErrorLogger::Log( std::string( "Waypoint out of range! (" ) + std::to_string( x ) + ", " + std::to_string( y ) + ')' );
-        runOnce = false;
-        return nullptr;
-    }
-    return m_waypoints.at( y * WAYPOINT_RESOLUTION + x );
-}
-
-vecWaypoints AIManager::GetNeighbours( const int x, const int y )
-{
-    std::vector<Waypoint*> neighbours;
-    int waypointIndex = y * WAYPOINT_RESOLUTION + x;
-
-    for ( int i = x - 1; i <= x + 1; i++ )
-    {
-        for ( int j = y - 1; j <= y + 1; j++ )
-        {
-            int neighbourIndex = j * WAYPOINT_RESOLUTION + i;
-            if ( waypointIndex != neighbourIndex )
-            {
-                if ( !m_waypoints[neighbourIndex] )
-                    continue;
-                neighbours.push_back( m_waypoints[neighbourIndex] );
-            }
-        }
-    }
-
-    return neighbours;
-}
-
-HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, UINT width, UINT height )
+HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> device, UINT width, UINT height )
 {
     this->hWnd = hWnd;
     this->width = width;
     this->height = height;
-    this->device = pd3dDevice;
+    this->m_pDevice = device;
     
     // create a pickup item ----------------------------------------------
     //PickupItem* pPickup = new PickupItem();
@@ -58,11 +21,11 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> p
 
     // create vehicles
     m_pCarBlue = new Vehicle( this, { 0.0, 0.0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 20.0 );
-    HRESULT hr = m_pCarBlue->InitMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_blue.dds" );
+    HRESULT hr = m_pCarBlue->InitMesh( device.Get(), L"Resources\\Textures\\car_blue.dds" );
     m_pCarBlue->Steering()->WanderOn();
 
     m_pCarRed = new Vehicle( this, { 0.0, 0.0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50.0, 150.0, 20.0 );
-    hr = m_pCarRed->InitMesh( pd3dDevice.Get(), L"Resources\\Textures\\car_red.dds" );
+    hr = m_pCarRed->InitMesh( device.Get(), L"Resources\\Textures\\car_red.dds" );
     m_pCarRed->Steering()->PursuitOn( m_pCarBlue );
 
     // create waypoints
@@ -89,47 +52,38 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> p
 void AIManager::CreateObstacles()
 {
     int noOfObstacles = 7;
-    for ( int i = 0; i < noOfObstacles; ++i )
+    for ( uint32_t i = 0; i < noOfObstacles; ++i )
     {
         bool overlapped = true;
         bool bOverlapped = true;
-
-        //keep creating tiddlywinks until we find one that doesn't overlap
-        //any others.Sometimes this can get into an endless loop because the
-        //obstacle has nowhere to fit. We test for this case and exit accordingly
-
-        int NumTrys = 0; int NumAllowableTrys = 2000;
+        int NumAllowableTrys = 2000;
+        int NumTrys = 0;
 
         while ( bOverlapped )
         {
             NumTrys++;
-
             if ( NumTrys > NumAllowableTrys ) return;
-
-            int radius = 50;
-
-            const int border = 10;
-            const int MinGapBetweenObstacles = 20;
 
             RECT rect;
             GetClientRect( GetHWND(), &rect );
             int cxClient = rect.right;
             int cyClient = rect.bottom;
 
+            int radius = 50;
+            const int border = 10;
             Obstacle* ob = new Obstacle(
                 RandInt( ( -cxClient / 2 ) + radius + border, ( cxClient / 2 ) - radius - border ),
                 RandInt( ( -cyClient / 2 ) + radius + border, ( cyClient / 2 ) - radius - 30 - border ),
                 radius
             );
 
-            HRESULT hr = ob->InitMesh( device.Get(), L"Resources\\Textures\\tyre.dds" );
+            HRESULT hr = ob->InitMesh( m_pDevice.Get(), L"Resources\\Textures\\tyre.dds" );
             if ( FAILED( hr ) ) return;
 
-            if ( !Overlapped( ob, m_obstacles, MinGapBetweenObstacles ) )
+            const int minimumGap = 20;
+            if ( !Overlapped( ob, m_obstacles, minimumGap ) )
             {
-                //its not overlapped so we can add it
                 m_obstacles.push_back( ob );
-
                 bOverlapped = false;
             }
             else
@@ -140,7 +94,7 @@ void AIManager::CreateObstacles()
     }
 }
 
-void AIManager::Update( const float fDeltaTime )
+void AIManager::Update( const float dt )
 {
     // waypoints
     /*for ( uint32_t i = 0; i < m_waypoints.size(); i++ )
@@ -166,12 +120,12 @@ void AIManager::Update( const float fDeltaTime )
     // update objects
     if ( !IsPaused() )
     {
-        m_pCarBlue->Update( fDeltaTime );
+        m_pCarBlue->Update( dt );
         if ( m_bEnableRedCar )
-            m_pCarRed->Update( fDeltaTime );
+            m_pCarRed->Update( dt );
 
         for ( uint32_t i = 0; i < m_obstacles.size(); i++ )
-            m_obstacles[i]->Update( fDeltaTime );
+            m_obstacles[i]->Update( dt );
     }
 
     // render objects
@@ -214,7 +168,6 @@ void AIManager::HandleKeyPresses( WPARAM param )
     case 'P':
         TogglePause();
         break;
-
     case 'Y':
         m_bShowObstacles = !m_bShowObstacles;
         if ( !m_bShowObstacles )
@@ -231,14 +184,12 @@ void AIManager::HandleKeyPresses( WPARAM param )
     }
 }
 
-bool AIManager::checkForCollisions( Vehicle* car )
+bool AIManager::CheckForCollisions( Vehicle* car )
 {
-    if ( m_pickups.size() == 0 )
-        return false;
-
-    XMVECTOR dummy;
+    if ( m_pickups.size() == 0 ) return false;
 
     // the car
+    XMVECTOR dummy;
     XMVECTOR carPos;
     XMVECTOR carScale;
     XMMatrixDecompose( &carScale, &dummy, &carPos,
@@ -251,7 +202,7 @@ bool AIManager::checkForCollisions( Vehicle* car )
     XMStoreFloat3( &boundingSphereCar.Center, carPos );
     boundingSphereCar.Radius = scale.x;
 
-    // a pickup - !! NOTE it is only referring the first one in the list !!
+    // a pickup
     XMVECTOR puPos;
     XMVECTOR puScale;
     XMMatrixDecompose( &puScale, &dummy, &puPos,
@@ -270,6 +221,42 @@ bool AIManager::checkForCollisions( Vehicle* car )
     }
 
     return false;
+}
+
+Waypoint* AIManager::GetWaypoint( const int x, const int y )
+{
+    static bool runOnce = true;
+    bool xOutOfRange = ( x < 0 || x > 19 ) ? true : false;
+    bool yOutOfRange = ( y < 0 || y > 19 ) ? true : false;
+    if ( ( xOutOfRange || yOutOfRange ) && runOnce )
+    {
+        ErrorLogger::Log( std::string( "Waypoint out of range! (" ) + std::to_string( x ) + ", " + std::to_string( y ) + ')' );
+        runOnce = false;
+        return nullptr;
+    }
+    return m_waypoints.at( y * WAYPOINT_RESOLUTION + x );
+}
+
+vecWaypoints AIManager::GetNeighbours( const int x, const int y )
+{
+    std::vector<Waypoint*> neighbours;
+    int waypointIndex = y * WAYPOINT_RESOLUTION + x;
+
+    for ( int i = x - 1; i <= x + 1; i++ )
+    {
+        for ( int j = y - 1; j <= y + 1; j++ )
+        {
+            int neighbourIndex = j * WAYPOINT_RESOLUTION + i;
+            if ( waypointIndex != neighbourIndex )
+            {
+                if ( !m_waypoints[neighbourIndex] )
+                    continue;
+                neighbours.push_back( m_waypoints[neighbourIndex] );
+            }
+        }
+    }
+
+    return neighbours;
 }
 
 void AIManager::SpawnControlWindow()

@@ -48,15 +48,12 @@ HRESULT Background::InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> device )
 	hr = CreateDDSTextureFromFile( device.Get(), L"Resources\\Textures\\track.dds", nullptr, &m_pTextureResourceView );
 	if ( FAILED( hr ) ) return hr;
 
-	D3D11_SAMPLER_DESC sampDesc = {};
-	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	sampDesc.MinLOD = 0;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	hr = device->CreateSamplerState( &sampDesc, &m_pSamplerLinear );
+	CD3D11_SAMPLER_DESC samplerDesc( CD3D11_DEFAULT{} );
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	hr = device->CreateSamplerState( &samplerDesc, &m_pSamplerLinear );
 
 	return hr;
 }
