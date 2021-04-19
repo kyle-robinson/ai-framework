@@ -5,9 +5,12 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include "Path.h"
 #include "Vehicle.h"
 
 class Vehicle;
+
+const float waypointSeekDist = 20;
 
 class SteeringBehaviour
 {
@@ -17,10 +20,11 @@ private:
 		NONE		= 0x00000,
 		ARRIVE		= 0x00002,
 		SEEK		= 0x00004,
-		FLEE		= 0x00006,
-		PURSUIT		= 0x00008,
-		OBSTACLE	= 0x00010,
-		WANDER		= 0x00020
+		FLEE		= 0x00008,
+		PURSUIT		= 0x00010,
+		OBSTACLE	= 0x00020,
+		WANDER		= 0x00040,
+		FOLLOW_PATH = 0x00080
 	};
 public:
 	enum Deceleration
@@ -30,24 +34,27 @@ public:
 		FAST	= 1
 	};
 private:
+	Path* m_pPath;
+	Vehicle* m_pVehicle;
+	Vehicle* m_pTargetAgent;
 	Vector2D m_vSteeringForce;
-	Vehicle* m_pTargetAgent = nullptr;
-	Vehicle* m_pVehicle = nullptr;
 
 	// behaviour parameters
 	Vector2D m_vWanderTarget;
-	float m_dDBoxLength = 40.0f;
-	float m_dWanderRadius = 10.0f;
-	float m_dWanderJitter = 200.0f;
-	float m_dWanderDistance = 10.0f;
+	float m_fDBoxLength = 40.0f;
+	float m_fWanderRadius = 10.0f;
+	float m_fWanderJitter = 200.0f;
+	float m_fWanderDistance = 10.0f;
+	double m_fWaypointSeekDistSq = powf( waypointSeekDist, 2 );
 
 	// weightings
-	float m_dWeightObstacleAvoidance = 10.0;
-	float m_dWeightPursuit = 1.0;
-	float m_dWeightWander = 10.0;
-	float m_dWeightArrive = 1.0;
-	float m_dWeightFlee = 1.0;
-	float m_dWeightSeek = 1.0;
+	float m_fWeightObstacleAvoidance = 10.0f;
+	float m_fWeightFollowPath = 1.0f;
+	float m_fWeightPursuit = 1.0f;
+	float m_fWeightWander = 10.0f;
+	float m_fWeightArrive = 1.0f;
+	float m_fWeightFlee = 1.0f;
+	float m_fWeightSeek = 1.0f;
 
 	// behaviours
 	bool AccumulateForce( Vector2D& netForce, Vector2D newForce );
@@ -56,6 +63,7 @@ private:
 	Vector2D Pursuit( const Vehicle* agent );
 	Vector2D Flee( Vector2D target );
 	Vector2D Seek( Vector2D target );
+	Vector2D FollowPath();
 	Vector2D Wander();
 
 	uint32_t m_uFlags = 0u;
@@ -63,6 +71,7 @@ private:
 	bool On( BehaviourType type ) { return ( m_uFlags & type ) == type; }
 public:
 	SteeringBehaviour( Vehicle* vehicle );
+	~SteeringBehaviour();
 
 	// force components
 	Vector2D Calculate();
@@ -101,9 +110,20 @@ public:
 	void WanderOff() { if ( On( WANDER ) ) m_uFlags ^= WANDER; }
 	bool IsWanderOn() { return On( WANDER ); }
 
-	double GetWanderJitter() const { return m_dWanderJitter; }
-	double GetWanderDistance() const { return m_dWanderDistance; }
-	double GetWanderRadius() const { return m_dWanderRadius; }
+	double GetWanderJitter() const { return m_fWanderJitter; }
+	double GetWanderDistance() const { return m_fWanderDistance; }
+	double GetWanderRadius() const { return m_fWanderRadius; }
+
+	// path following
+	void FollowPathOn() { m_uFlags |= FOLLOW_PATH; }
+	void FollowPathOff() { if ( On( FOLLOW_PATH ) ) m_uFlags ^= FOLLOW_PATH; }
+	bool IsFollowPathOn() { return On( FOLLOW_PATH ); }
+
+	void SetPath( std::list<Vector2D> new_path ) { m_pPath->Set( new_path ); }
+	void CreateRandomPath( int num_waypoints, int mx, int my, int cx, int cy )const
+	{
+		m_pPath->CreateRandomPath( num_waypoints, mx, my, cx, cy );
+	}
 };
 
 #endif

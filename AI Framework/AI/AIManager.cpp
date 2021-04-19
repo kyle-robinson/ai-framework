@@ -5,7 +5,18 @@
 #include "PickupItem.h"
 #include "WinMain.h"
 #include <sstream>
+#include <vector>
 #include <imgui/imgui.h>
+
+// globals
+const float xGap = SCREEN_WIDTH / WAYPOINT_RESOLUTION;
+const float yGap = SCREEN_HEIGHT / WAYPOINT_RESOLUTION;
+const float xStart = -( SCREEN_WIDTH / 2 ) + ( xGap / 2 );
+const float yStart = -( SCREEN_HEIGHT / 2 ) + ( yGap / 2 );
+std::vector<std::vector<int>> g_vWaypoints{
+    { 11, 15 }, { 2, 18 }, { 0, 12 }, { 2, 8 }, { 4, 2 }, { 7, 2 }, { 7, 4 },
+    { 4, 13 }, { 9, 10 }, { 16, 8 }, { 13, 4 }, { 14, 2 }, { 18, 2 }, { 19, 7 }, { 19, 11 },
+};
 
 HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> device, UINT width, UINT height )
 {
@@ -13,13 +24,22 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> d
     this->width = width;
     this->height = height;
     this->m_pDevice = device;
-    
-    // create pickups
+
+    // create waypoints
     uint32_t index = 0;
-    float xGap = SCREEN_WIDTH / WAYPOINT_RESOLUTION;
-    float yGap = SCREEN_HEIGHT / WAYPOINT_RESOLUTION;
-    float xStart = -( SCREEN_WIDTH / 2 ) + ( xGap / 2 );
-    float yStart = -( SCREEN_HEIGHT / 2 ) + ( yGap / 2 );
+    for ( uint32_t j = 0; j < WAYPOINT_RESOLUTION; j++ )
+    {
+        for ( uint32_t i = 0; i < WAYPOINT_RESOLUTION; i++ )
+        {
+            Waypoint* wp = new Waypoint();
+            HRESULT hr = wp->InitMesh( device, index++ );
+            wp->SetPosition( { xStart + ( xGap * i ), yStart + ( yGap * j ) } );
+            m_waypoints.push_back( wp );
+        }
+    }
+
+    // create pickups
+    index = 0;
     for ( uint32_t i = 0; i < WAYPOINT_RESOLUTION; i++ )
     {
         for ( uint32_t j = 0; j < WAYPOINT_RESOLUTION; j++ )
@@ -34,32 +54,22 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> d
         }
     }
 
+    // create path
+    m_pPath = new Path();
+    for ( uint32_t i = 0; i < g_vWaypoints.size(); i++ )
+    {
+        m_pPath->AddWayPoint( { xStart + ( xGap * g_vWaypoints[i][0] ), yStart + ( yGap * g_vWaypoints[i][1] ) } );
+    }
+
     // create vehicles
-    m_pCarBlue = new Vehicle( this, { 0, 0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1, 50, 150, 20 );
+    m_pCarBlue = new Vehicle( this, { 100, 200 }, RandFloat() * TwoPi, { 0, 0 }, 1, 25, 50, 20 );
     HRESULT hr = m_pCarBlue->InitMesh( device.Get(), L"Resources\\Textures\\car_blue.dds" );
-    m_pCarBlue->Steering()->WanderOn();
+    m_pCarBlue->Steering()->SetPath( m_pPath->GetPath() );
+    m_pCarBlue->Steering()->FollowPathOn();
 
     m_pCarRed = new Vehicle( this, { 0, 0 }, RandFloat() * TwoPi, { 0, 0 }, 1, 50, 150, 20 );
     hr = m_pCarRed->InitMesh( device.Get(), L"Resources\\Textures\\car_red.dds" );
     m_pCarRed->Steering()->PursuitOn( m_pCarBlue );
-
-    // create waypoints
-    /*float xGap = SCREEN_WIDTH / WAYPOINT_RESOLUTION;
-    float yGap = SCREEN_HEIGHT / WAYPOINT_RESOLUTION;
-    float xStart = -( SCREEN_WIDTH / 2 ) + ( xGap / 2 );
-    float yStart = -( SCREEN_HEIGHT / 2 ) + ( yGap / 2 );
-
-    uint32_t index = 0;
-    for ( uint32_t j = 0; j < WAYPOINT_RESOLUTION; j++ )
-    {
-        for ( uint32_t i = 0; i < WAYPOINT_RESOLUTION; i++ )
-        {
-            Waypoint* wp = new Waypoint();
-            hr = wp->initMesh( pd3dDevice, index++ );
-            wp->setPosition( { xStart + ( xGap * i ), yStart + ( yGap * j ), 0 } );
-            m_waypoints.push_back( wp );
-        }
-    }*/
 
     return hr;
 }
@@ -112,20 +122,6 @@ void AIManager::CreateObstacles()
 
 void AIManager::Update( const float dt )
 {
-    // waypoints
-    /*for ( uint32_t i = 0; i < m_waypoints.size(); i++ )
-    {
-        m_waypoints[i]->update( fDeltaTime );
-        AddItemToDrawList( m_waypoints[i] ); // if you comment this in, it will display the waypoints
-    }
-
-    AddItemToDrawList( GetWaypoint( 9, 1 ) );
-    AddItemToDrawList( GetWaypoint( 5, 1 ) );
-
-    //vecWaypoints neighbours = GetNeighbours( 19, 10 );
-    for ( uint32_t i = 0; i < neighbours.size(); i++ )
-        AddItemToDrawList( neighbours[i] );*/
-
     // UPDATE
     {
         // cars
@@ -136,6 +132,10 @@ void AIManager::Update( const float dt )
                 m_pCarRed->Update( dt );
         }
 
+        // waypoints
+        for ( uint32_t i = 0; i < m_waypoints.size(); i++ )
+            m_waypoints[i]->Update( dt );
+
         // obstacles
         for ( uint32_t i = 0; i < m_obstacles.size(); i++ )
             m_obstacles[i]->Update( dt );
@@ -144,23 +144,27 @@ void AIManager::Update( const float dt )
         for ( uint32_t i = 0; i < m_pickups.size(); i++ )
             m_pickups[i]->Update( dt );
 
-        CheckForCollisions( m_pCarBlue );
-
+        // collisions
         static int pickupTimer;
+        if ( CheckForCollisions( m_pCarBlue ) )
+        {
+            OutputDebugStringA( "Item Acquired: Speed Increase!\n" );
+            m_bItemPickedUp = true;
+        }
+
+        // update car parameters on item pickup
         if ( m_bItemPickedUp && pickupTimer > 0 )
         {
-            m_pCarBlue->SetMaxSpeed( 250 );
-            m_pCarBlue->SetMaxForce( 150 );
-
             pickupTimer--;
+            m_pCarBlue->SetMaxForce( 50 );
+            m_pCarBlue->SetMaxSpeed( 100 );
         }
         else
         {
-            m_pCarBlue->SetMaxSpeed( 150 );
-            m_pCarBlue->SetMaxForce( 50 );
-
-            pickupTimer = 100;
+            pickupTimer = 150;
             m_bItemPickedUp = false;
+            m_pCarBlue->SetMaxForce( 25 );
+            m_pCarBlue->SetMaxSpeed( 50 );
         }
     }
 
@@ -170,6 +174,10 @@ void AIManager::Update( const float dt )
         AddItemToDrawList( m_pCarBlue );
         if ( m_bEnableRedCar )
             AddItemToDrawList( m_pCarRed );
+
+        // waypoints
+        for ( uint32_t i = 0; i < m_waypoints.size(); i++ )
+            AddItemToDrawList( m_waypoints[i] );
 
         // obstacles
         for ( uint32_t i = 0; i < m_obstacles.size(); i++ )
@@ -184,28 +192,6 @@ void AIManager::Update( const float dt )
     }
 }
 
-/*void AIManager::LeftMouseUp( const int x, const int y )
-{
-    //m_pCar->setPositionTo( Vector2D( x, y ) );
-
-    static PathFinder pathFinder;
-    path.push_back(
-        pathFinder.GetPathBetween(
-            Vector2D( m_pCar->getPosition()->x, m_pCar->getPosition()->y ),
-            Vector2D( x, y )
-        )[0]
-    );
-}
-
-void AIManager::RightMouseUp( const int x, const int y )
-{
-    //m_pCar2->setPositionTo( Vector2D( x, y ) );
-
-    static int count = 0;
-    if( count < path.size() )
-        m_pCar->setPositionTo( path[count++] );
-}*/
-
 void AIManager::HandleKeyPresses( WPARAM param )
 {
     switch ( param )
@@ -213,7 +199,7 @@ void AIManager::HandleKeyPresses( WPARAM param )
     case 'P':
         TogglePause();
         break;
-    case 'Y':
+    case 'O':
         m_bShowObstacles = !m_bShowObstacles;
         if ( !m_bShowObstacles )
         {
@@ -225,6 +211,14 @@ void AIManager::HandleKeyPresses( WPARAM param )
             CreateObstacles();
             m_pCarBlue->Steering()->ObstacleAvoidanceOn();
         }
+        break;
+    case 'R':
+        delete m_pPath;
+        m_pPath = new Path();
+        m_pPath->AddWayPoint( { xStart + ( xGap * g_vWaypoints[0][0] ), yStart + ( yGap * g_vWaypoints[0][1] ) } );
+        m_pCarBlue->World()->SetCrosshair( xStart + ( xGap * g_vWaypoints[0][0] ), yStart + ( yGap * g_vWaypoints[0][1] ) );
+        m_pCarBlue->Steering()->SetPath( m_pPath->GetPath() );
+        m_pCarBlue->Steering()->ArriveOn();
         break;
     }
 }
@@ -263,58 +257,18 @@ bool AIManager::CheckForCollisions( Vehicle* car )
 
         // collision occurred
         if ( boundingSphereCar.Intersects( boundingSpherePU ) )
-        {
-            OutputDebugStringA( "Collision!\n" );
-            m_bItemPickedUp = true;
             return true;
-        }
     }
 
     return false;
 }
 
-Waypoint* AIManager::GetWaypoint( const int x, const int y )
-{
-    static bool runOnce = true;
-    bool xOutOfRange = ( x < 0 || x > 19 ) ? true : false;
-    bool yOutOfRange = ( y < 0 || y > 19 ) ? true : false;
-    if ( ( xOutOfRange || yOutOfRange ) && runOnce )
-    {
-        ErrorLogger::Log( std::string( "Waypoint out of range! (" ) + std::to_string( x ) + ", " + std::to_string( y ) + ')' );
-        runOnce = false;
-        return nullptr;
-    }
-    return m_waypoints.at( y * WAYPOINT_RESOLUTION + x );
-}
-
-vecWaypoints AIManager::GetNeighbours( const int x, const int y )
-{
-    std::vector<Waypoint*> neighbours;
-    int waypointIndex = y * WAYPOINT_RESOLUTION + x;
-
-    for ( int i = x - 1; i <= x + 1; i++ )
-    {
-        for ( int j = y - 1; j <= y + 1; j++ )
-        {
-            int neighbourIndex = j * WAYPOINT_RESOLUTION + i;
-            if ( waypointIndex != neighbourIndex )
-            {
-                if ( !m_waypoints[neighbourIndex] )
-                    continue;
-                neighbours.push_back( m_waypoints[neighbourIndex] );
-            }
-        }
-    }
-
-    return neighbours;
-}
-
 void AIManager::SpawnControlWindow()
 {
-    if ( ImGui::Begin( "Steering", FALSE, ImGuiWindowFlags_AlwaysAutoResize ) )
+    if ( ImGui::Begin( "Behaviours", FALSE, ImGuiWindowFlags_AlwaysAutoResize ) )
     {
         // wander
-        static bool wanderBool = true;
+        static bool wanderBool = false;
         ImGui::Checkbox( "Wander", &wanderBool );
         wanderBool ? m_pCarBlue->Steering()->WanderOn() : m_pCarBlue->Steering()->WanderOff();
 

@@ -2,6 +2,10 @@
 #ifndef TRANSFORMATIONS_H
 #define TRANSFORMATIONS_H
 
+//------------------------------------------------------------------------
+//  Author: Mat Buckland 2002
+//------------------------------------------------------------------------
+
 #include <vector>
 #include "Vector2D.h"
 #include "C2DMatrix.h"
@@ -51,6 +55,13 @@ inline Vector2D VectorToWorldSpace( const Vector2D& vec, const Vector2D& heading
     matTransform.TransformVector2Ds( newVec );
 
     return newVec;
+}
+
+inline void Vec2DRotateAroundOrigin( Vector2D& v, double ang )
+{
+    C2DMatrix mat;
+    mat.Rotate( ang );
+    mat.TransformVector2Ds( v );
 }
 
 #endif

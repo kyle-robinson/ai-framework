@@ -81,7 +81,7 @@ END
 //
 1 TEXTINCLUDE  
 BEGIN
-    "resource.h\0"
+    "Resources/resource.h\0"
 END
 
 2 TEXTINCLUDE  

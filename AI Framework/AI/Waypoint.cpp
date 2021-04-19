@@ -1,6 +1,6 @@
 #include "Waypoint.h"
 
-/*std::vector<int> vecOffTrack400{ 0,1,2,3,23,8,9,10,11,12,13,14,15,16,17,18,19,39,32,31,30,
+std::vector<int> vecOffTrack400{ 0,1,2,3,23,8,9,10,11,12,13,14,15,16,17,18,19,39,32,31,30,
 	29,28,23,22,21,20,41,42,62,81,61,100,101,121,140,160,180,200,380,217,157,197,177,178,198,
 	322,323,303,302,301,281,282,262,261,242,222,203,183,163,143,124,144,125,105,104,85,86,
 	66,65,29,30,32,33,49,50,51,52,72,71,70,109,129,149,169,188,168,148,128,147,167,207,
@@ -12,21 +12,21 @@
 	389,369,388,387,367,386,385,40,7,96,92,90,298,337,316,334,354,315,352,350,368,360,381,
 	340,181,161,141,5,6,38,99,34,305,306,270,232, 139,82,102,63,43,24,4,119,220,223,223,218 };
 
-std::vector<int> vecCheckpoint{ 311,239,159,58,54,93,176,209,264,87,47,44,162,240,362};
+std::vector<int> vecCheckpoint{ 311,239,159,58,54,93,176,209,264,87,47,44,162,240,362 };
 
-HRESULT	Waypoint::initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, const int index )
+HRESULT	Waypoint::InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> device, const int index )
 {
-	m_visible = true;
-	m_isCheckpoint = false;
-	m_isOnTrack = false;
+	m_bVisible = true;
+	m_bIsOnTrack = false;
+	m_bIsCheckpoint = false;
 
 	if ( std::find( vecOffTrack400.begin(), vecOffTrack400.end(), index ) == vecOffTrack400.end() )
 	{
-		m_isOnTrack = true;
+		m_bIsOnTrack = true;
 		if ( std::find( vecCheckpoint.begin(), vecCheckpoint.end(), index ) != vecCheckpoint.end() )
 		{
 			SetTextureName( L"Resources\\Textures\\yellow.dds" );
-			m_isCheckpoint = true;
+			m_bIsCheckpoint = true;
 		}
 		else
 		{
@@ -34,11 +34,11 @@ HRESULT	Waypoint::initMesh( Microsoft::WRL::ComPtr<ID3D11Device> pd3dDevice, con
 		}
 	}
 	else {
-		m_isOnTrack = false;
+		m_bIsOnTrack = false;
 		m_vScale = { 10.0f, 10.0f };
 		SetTextureName( L"Resources\\Textures\\blue.dds" );
 	}
 
-	HRESULT hr = DrawableGameObject::InitMesh( pd3dDevice );
+	HRESULT hr = DrawableGameObject::InitMesh( device );
 	return hr;
-}*/
+}

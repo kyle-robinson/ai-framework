@@ -11,9 +11,11 @@
 #include "EntityTemplates.h"
 #include "Obstacle.h"
 #include "Vehicle.h"
+#include "Path.h"
 
 class PickupItem;
 class Waypoint;
+class Path;
 
 typedef std::vector<DrawableGameObject*> vecDrawables;
 typedef std::vector<Obstacle*> vecObstacles;
@@ -43,8 +45,6 @@ public:
 	}
 
 	// objects
-	Waypoint* GetWaypoint( const int x, const int y );
-	vecWaypoints GetNeighbours( const int x, const int y );
 	vecWaypoints GetWaypoints() const noexcept { return m_waypoints; }
 	vecDrawables GetObstacles() noexcept { return m_obstacles; }
 
@@ -71,6 +71,7 @@ private:
 	bool m_bEnableRedCar = false;
 	bool m_bShowObstacles = false;
 
+	Path* m_pPath;
 	Vehicle* m_pCarRed;
 	Vehicle* m_pCarBlue;
 	vecPickups m_pickups;

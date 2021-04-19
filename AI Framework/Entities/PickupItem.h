@@ -4,7 +4,7 @@
 
 #include "DrawableGameObject.h"
 
-std::vector<int> g_vPickupPositions{ 159,54,176,264,47,162,362 };
+std::vector<int> g_vPickupPositions{ 311, 159, 209, 87, 162, 362 };
 
 class PickupItem : public DrawableGameObject
 {

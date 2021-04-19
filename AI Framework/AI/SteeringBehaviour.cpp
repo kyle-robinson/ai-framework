@@ -5,38 +5,47 @@
 SteeringBehaviour::SteeringBehaviour( Vehicle* vehicle ) : m_pVehicle( vehicle )
 {
     double theta = RandFloat() * TwoPi;
-    m_vWanderTarget = Vector2D( m_dWanderRadius * cos( theta ), m_dWanderRadius * sin( theta ) );
+    m_vWanderTarget = Vector2D( m_fWanderRadius * cos( theta ), m_fWanderRadius * sin( theta ) );
+
+    m_pPath = new Path();
+    m_pPath->LoopOn();
+}
+
+SteeringBehaviour::~SteeringBehaviour()
+{
+    delete m_pPath;
+    m_pPath = nullptr;
 }
 
 Vector2D SteeringBehaviour::Calculate()
 {
-    //reset the steering force
+    // reset the steering force
     m_vSteeringForce.Zero();
     Vector2D force;
 
     if ( On( OBSTACLE ) )
     {
-        force = ObstacleAvoidance( m_pVehicle->World()->GetObstacles() ) * m_dWeightObstacleAvoidance;
+        force = ObstacleAvoidance( m_pVehicle->World()->GetObstacles() ) * m_fWeightObstacleAvoidance;
         if ( !AccumulateForce( m_vSteeringForce, force ) ) return m_vSteeringForce;
     }
 
     if ( On( FLEE ) )
     {
-        force = Flee( m_pVehicle->World()->GetCrosshair() ) * m_dWeightFlee;
+        force = Flee( m_pVehicle->World()->GetCrosshair() ) * m_fWeightFlee;
         if ( !AccumulateForce( m_vSteeringForce, force ) )
             return m_vSteeringForce;
     }
 
     if ( On( SEEK ) )
     {
-        force = Seek( m_pVehicle->World()->GetCrosshair() ) * m_dWeightSeek;
+        force = Seek( m_pVehicle->World()->GetCrosshair() ) * m_fWeightSeek;
         if ( !AccumulateForce( m_vSteeringForce, force ) )
             return m_vSteeringForce;
     }
 
     if ( On( ARRIVE ) )
     {
-        force = Arrive( m_pVehicle->World()->GetCrosshair(), m_eDeceleration ) * m_dWeightArrive;
+        force = Arrive( m_pVehicle->World()->GetCrosshair(), m_eDeceleration ) * m_fWeightArrive;
         if ( !AccumulateForce( m_vSteeringForce, force ) )
             return m_vSteeringForce;
     }
@@ -44,14 +53,21 @@ Vector2D SteeringBehaviour::Calculate()
     if ( On( PURSUIT ) )
     {
         assert( m_pTargetAgent && "Pursuit target not assigned!" );
-        force = Pursuit( m_pTargetAgent ) * m_dWeightPursuit;
+        force = Pursuit( m_pTargetAgent ) * m_fWeightPursuit;
         if ( !AccumulateForce( m_vSteeringForce, force ) )
             return m_vSteeringForce;
     }
 
     if ( On( WANDER ) )
     {
-        force = Wander() * m_dWeightWander;
+        force = Wander() * m_fWeightWander;
+        if ( !AccumulateForce( m_vSteeringForce, force ) )
+            return m_vSteeringForce;
+    }
+
+    if ( On( FOLLOW_PATH ) )
+    {
+        force = FollowPath() * m_fWeightFollowPath;
         if ( !AccumulateForce( m_vSteeringForce, force ) )
             return m_vSteeringForce;
     }
@@ -182,7 +198,7 @@ Vector2D SteeringBehaviour::Wander()
 {
     //this behavior is dependent on the update rate, so this line must
     //be included when using time independent framerate.
-    double JitterThisTimeSlice = m_dWanderJitter * m_pVehicle->GetDeltaTime();
+    double JitterThisTimeSlice = m_fWanderJitter * m_pVehicle->GetDeltaTime();
 
     //first, add a small random vector to the target's position
     m_vWanderTarget += Vector2D( RandomClamped() * JitterThisTimeSlice,
@@ -193,10 +209,10 @@ Vector2D SteeringBehaviour::Wander()
 
     //increase the length of the vector to the same as the radius
     //of the wander circle
-    m_vWanderTarget *= m_dWanderRadius;
+    m_vWanderTarget *= m_fWanderRadius;
 
     //move the target into a position WanderDist in front of the agent
-    Vector2D target = m_vWanderTarget + Vector2D( m_dWanderDistance, 0 );
+    Vector2D target = m_vWanderTarget + Vector2D( m_fWanderDistance, 0 );
 
     //project the target into world space
     Vector2D Target = PointToWorldSpace( target,
@@ -211,11 +227,10 @@ Vector2D SteeringBehaviour::Wander()
 Vector2D SteeringBehaviour::ObstacleAvoidance( const std::vector<DrawableGameObject*>& obstacles )
 {
     //the detection box length is proportional to the agent's velocity
-    m_dDBoxLength = 40.0 +
-        ( m_pVehicle->GetSpeed() / m_pVehicle->GetMaxSpeed() ) * 40.0;
+    m_fDBoxLength = 40.0f + ( m_pVehicle->GetSpeed() / m_pVehicle->GetMaxSpeed() ) * 40.0f;
 
     //tag all obstacles within range of the box for processing
-    m_pVehicle->World()->TagObstaclesWithinViewRange( m_pVehicle, m_dDBoxLength );
+    m_pVehicle->World()->TagObstaclesWithinViewRange( m_pVehicle, m_fDBoxLength );
 
     //this will keep track of the closest intersecting obstacle (CIB)
     DrawableGameObject* ClosestIntersectingObstacle = NULL;
@@ -293,7 +308,7 @@ Vector2D SteeringBehaviour::ObstacleAvoidance( const std::vector<DrawableGameObj
     {
         //the closer the agent is to an object, the stronger the 
         //steering force should be
-        double multiplier = 1.0 + ( m_dDBoxLength - LocalPosOfClosestObstacle.x ) / m_dDBoxLength;
+        float multiplier = 1.0f + ( m_fDBoxLength - LocalPosOfClosestObstacle.x ) / m_fDBoxLength;
 
         //calculate the lateral force
         SteeringForce.y = ( ClosestIntersectingObstacle->GetBoundingRadius() -
@@ -301,13 +316,23 @@ Vector2D SteeringBehaviour::ObstacleAvoidance( const std::vector<DrawableGameObj
 
         //apply a braking force proportional to the obstacles distance from
         //the vehicle. 
-        const double BrakingWeight = 0.2;
-
+        const float BrakingWeight = 0.2f;
         SteeringForce.x = ( ClosestIntersectingObstacle->GetBoundingRadius() -
-            LocalPosOfClosestObstacle.x ) *
-            BrakingWeight;
+            LocalPosOfClosestObstacle.x ) * BrakingWeight;
     }
 
     //finally, convert the steering vector from local to world space
     return VectorToWorldSpace( SteeringForce, m_pVehicle->GetHeading(), m_pVehicle->GetSide() );
+}
+
+Vector2D SteeringBehaviour::FollowPath()
+{
+    //move to next target if close enough to current target (working in distance squared space)
+    if ( Vec2DDistanceSq( m_pPath->CurrentWaypoint(), m_pVehicle->GetPosition() ) < m_fWaypointSeekDistSq )
+        m_pPath->SetNextWaypoint();
+
+    if ( !m_pPath->Finished() )
+        return Seek( m_pPath->CurrentWaypoint() );
+    else
+        return Arrive( m_pPath->CurrentWaypoint(), NORMAL );
 }

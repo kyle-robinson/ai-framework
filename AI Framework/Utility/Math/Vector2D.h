@@ -7,6 +7,7 @@
 //------------------------------------------------------------------------
 
 #include <limits>
+#include <sstream>
 #include <windows.h>
 
 const float Minfloat = ( std::numeric_limits<float>::min )( );

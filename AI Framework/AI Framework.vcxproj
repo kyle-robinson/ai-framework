@@ -33,6 +33,7 @@
     <ClCompile Include="..\External\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="..\External\imgui\imgui_widgets.cpp" />
     <ClCompile Include="AI\AIManager.cpp" />
+    <ClCompile Include="AI\Path.cpp" />
     <ClCompile Include="AI\PathFinder.cpp" />
     <ClCompile Include="AI\SteeringBehaviour.cpp" />
     <ClCompile Include="AI\Waypoint.cpp" />
@@ -41,6 +42,7 @@
     <ClCompile Include="Graphics\Graphics.cpp" />
     <ClCompile Include="Graphics\ImGuiManager.cpp" />
     <ClCompile Include="Graphics\Shaders.cpp" />
+    <ClCompile Include="Utility\Cgdi.cpp" />
     <ClCompile Include="WinMain.cpp" />
     <ClCompile Include="Model\DDSTextureLoader.cpp" />
     <ClCompile Include="Model\DrawableGameObject.cpp" />
@@ -58,6 +60,7 @@
     <ClInclude Include="..\External\imgui\imstb_textedit.h" />
     <ClInclude Include="..\External\imgui\imstb_truetype.h" />
     <ClInclude Include="AI\AIManager.h" />
+    <ClInclude Include="AI\Path.h" />
     <ClInclude Include="AI\PathFinder.h" />
     <ClInclude Include="AI\SteeringBehaviour.h" />
     <ClInclude Include="AI\Waypoint.h" />
@@ -79,6 +82,7 @@
     <ClInclude Include="Model\DDSTextureLoader.h" />
     <ClInclude Include="Model\DrawableGameObject.h" />
     <ClInclude Include="Resources\resource.h" />
+    <ClInclude Include="Utility\Cgdi.h" />
     <ClInclude Include="Utility\EntityTemplates.h" />
     <ClInclude Include="Utility\Logging\COMException.h" />
     <ClInclude Include="Utility\Logging\ErrorLogger.h" />
