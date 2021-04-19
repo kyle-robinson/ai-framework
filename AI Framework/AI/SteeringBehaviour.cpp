@@ -31,7 +31,7 @@ Vector2D SteeringBehaviour::Calculate()
 
     if ( On( FLEE ) )
     {
-        force = Flee( m_pVehicle->World()->GetCrosshair() ) * m_fWeightFlee;
+        force = Flee( m_pVehicle->World()->GetRedCar()->GetPosition() ) * m_fWeightFlee;
         if ( !AccumulateForce( m_vSteeringForce, force ) )
             return m_vSteeringForce;
     }
@@ -116,11 +116,6 @@ bool SteeringBehaviour::AccumulateForce( Vector2D& RunningTot, Vector2D ForceToA
     return true;
 }
 
-//--------------------------- Arrive -------------------------------------
-//
-//  This behavior is similar to seek but it attempts to arrive at the
-//  target with a zero velocity
-//------------------------------------------------------------------------
 Vector2D SteeringBehaviour::Arrive( Vector2D TargetPos, Deceleration deceleration )
 {
     Vector2D ToTarget = TargetPos - m_pVehicle->GetPosition();
@@ -154,9 +149,11 @@ Vector2D SteeringBehaviour::Arrive( Vector2D TargetPos, Deceleration deceleratio
 
 Vector2D SteeringBehaviour::Flee( Vector2D TargetPos )
 {
-    Vector2D DesiredVelocity = Vec2DNormalize( m_pVehicle->GetPosition() - TargetPos )
-        * m_pVehicle->GetMaxSpeed();
+    const double PanicDistanceSq = powf( 200.0f, 2.0f );
+    if ( Vec2DDistanceSq( m_pVehicle->GetPosition(), m_pVehicle->World()->GetRedCar()->GetPosition() ) > PanicDistanceSq )
+        return Vector2D( 0, 0 );
 
+    Vector2D DesiredVelocity = Vec2DNormalize( m_pVehicle->GetPosition() - TargetPos ) * m_pVehicle->GetMaxSpeed();
     return ( DesiredVelocity - m_pVehicle->GetVelocity() );
 }
 

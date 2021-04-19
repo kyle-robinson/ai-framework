@@ -27,7 +27,6 @@ class AIManager
 public:
 	HRESULT Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> pDevice, UINT width, UINT height );
 	void Update( const float dt );
-	void HandleKeyPresses( WPARAM param );
 	void CreateObstacles();
 	
 	// crosshair
@@ -47,9 +46,9 @@ public:
 	// objects
 	vecWaypoints GetWaypoints() const noexcept { return m_waypoints; }
 	vecDrawables GetObstacles() noexcept { return m_obstacles; }
+	Vehicle* GetRedCar() const noexcept { return m_pCarRed; }
 
 	// utility
-	void SpawnControlWindow();
 	HWND GetHWND() const noexcept { return hWnd; }
 	int GetScreenX() const noexcept { return width; }
 	int GetScreenY() const noexcept { return height; }
@@ -58,8 +57,9 @@ public:
 protected:
 	bool CheckForCollisions( Vehicle* car );
 private:
-	bool IsPaused() const noexcept { return m_bPaused; }
-	void TogglePause() noexcept { m_bPaused = !m_bPaused; }
+	void SpawnBehaviourWindow();
+	void SpawnObstacleWindow();
+	void SpawnControlWindow();
 
 	HWND hWnd;
 	UINT width;
@@ -67,6 +67,7 @@ private:
 
 	Vector2D m_crosshair;
 	bool m_bPaused = false;
+	int m_iObstacleCount = 7;
 	bool m_bItemPickedUp = false;
 	bool m_bEnableRedCar = false;
 	bool m_bShowObstacles = false;

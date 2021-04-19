@@ -49,11 +49,11 @@ private:
 
 	// weightings
 	float m_fWeightObstacleAvoidance = 10.0f;
-	float m_fWeightFollowPath = 1.0f;
+	float m_fWeightFollowPath = 10.0f;
 	float m_fWeightPursuit = 1.0f;
 	float m_fWeightWander = 10.0f;
 	float m_fWeightArrive = 1.0f;
-	float m_fWeightFlee = 1.0f;
+	float m_fWeightFlee = 10.0f;
 	float m_fWeightSeek = 1.0f;
 
 	// behaviours

@@ -16,7 +16,7 @@ std::vector<int> vecCheckpoint{ 311,239,159,58,54,93,176,209,264,87,47,44,162,24
 
 HRESULT	Waypoint::InitMesh( Microsoft::WRL::ComPtr<ID3D11Device> device, const int index )
 {
-	m_bVisible = true;
+	m_bVisible = false;
 	m_bIsOnTrack = false;
 	m_bIsCheckpoint = false;
 

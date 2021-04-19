@@ -1,11 +1,8 @@
 #include "AIManager.h"
-#include "PathFinder.h"
 #include "SteeringBehaviour.h"
-#include "Logging/ErrorLogger.h"
 #include "PickupItem.h"
+#include "Waypoint.h"
 #include "WinMain.h"
-#include <sstream>
-#include <vector>
 #include <imgui/imgui.h>
 
 // globals
@@ -34,7 +31,7 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> d
             Waypoint* wp = new Waypoint();
             HRESULT hr = wp->InitMesh( device, index++ );
             wp->SetPosition( { xStart + ( xGap * i ), yStart + ( yGap * j ) } );
-            m_waypoints.push_back( wp );
+            m_waypoints.push_back( std::move( wp ) );
         }
     }
 
@@ -57,17 +54,14 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> d
     // create path
     m_pPath = new Path();
     for ( uint32_t i = 0; i < g_vWaypoints.size(); i++ )
-    {
         m_pPath->AddWayPoint( { xStart + ( xGap * g_vWaypoints[i][0] ), yStart + ( yGap * g_vWaypoints[i][1] ) } );
-    }
 
     // create vehicles
-    m_pCarBlue = new Vehicle( this, { 100, 200 }, RandFloat() * TwoPi, { 0, 0 }, 1, 25, 50, 20 );
+    m_pCarBlue = new Vehicle( this, { 120, 180 }, RandFloat() * TwoPi, { 0, 0 }, 1, 25, 50, 20 );
     HRESULT hr = m_pCarBlue->InitMesh( device.Get(), L"Resources\\Textures\\car_blue.dds" );
     m_pCarBlue->Steering()->SetPath( m_pPath->GetPath() );
-    m_pCarBlue->Steering()->FollowPathOn();
 
-    m_pCarRed = new Vehicle( this, { 0, 0 }, RandFloat() * TwoPi, { 0, 0 }, 1, 50, 150, 20 );
+    m_pCarRed = new Vehicle( this, { 160, 140 }, RandFloat() * TwoPi, { 0, 0 }, 1, 25, 50, 20 );
     hr = m_pCarRed->InitMesh( device.Get(), L"Resources\\Textures\\car_red.dds" );
     m_pCarRed->Steering()->PursuitOn( m_pCarBlue );
 
@@ -76,7 +70,7 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> d
 
 void AIManager::CreateObstacles()
 {
-    int noOfObstacles = 7;
+    int noOfObstacles = m_iObstacleCount;
     for ( uint32_t i = 0; i < noOfObstacles; ++i )
     {
         bool overlapped = true;
@@ -125,7 +119,7 @@ void AIManager::Update( const float dt )
     // UPDATE
     {
         // cars
-        if ( !IsPaused() )
+        if ( !m_bPaused )
         {
             m_pCarBlue->Update( dt );
             if ( m_bEnableRedCar )
@@ -175,51 +169,23 @@ void AIManager::Update( const float dt )
         if ( m_bEnableRedCar )
             AddItemToDrawList( m_pCarRed );
 
-        // waypoints
-        for ( uint32_t i = 0; i < m_waypoints.size(); i++ )
-            AddItemToDrawList( m_waypoints[i] );
+        // pickups
+        for ( uint32_t i = 0; i < m_pickups.size(); i++ )
+            AddItemToDrawList( m_pickups[i] );
 
         // obstacles
         for ( uint32_t i = 0; i < m_obstacles.size(); i++ )
             AddItemToDrawList( m_obstacles[i] );
 
-        // pickups
-        for ( uint32_t i = 0; i < m_pickups.size(); i++ )
-            AddItemToDrawList( m_pickups[i] );
+        // waypoints
+        if ( m_waypoints[0]->IsVisible() )
+            for ( uint32_t i = 0; i < m_waypoints.size(); i++ )
+                AddItemToDrawList( m_waypoints[i] );
 
         // imgui
+        SpawnBehaviourWindow();
+        SpawnObstacleWindow();
         SpawnControlWindow();
-    }
-}
-
-void AIManager::HandleKeyPresses( WPARAM param )
-{
-    switch ( param )
-    {
-    case 'P':
-        TogglePause();
-        break;
-    case 'O':
-        m_bShowObstacles = !m_bShowObstacles;
-        if ( !m_bShowObstacles )
-        {
-            m_obstacles.clear();
-            m_pCarBlue->Steering()->ObstacleAvoidanceOff();
-        }
-        else
-        {
-            CreateObstacles();
-            m_pCarBlue->Steering()->ObstacleAvoidanceOn();
-        }
-        break;
-    case 'R':
-        delete m_pPath;
-        m_pPath = new Path();
-        m_pPath->AddWayPoint( { xStart + ( xGap * g_vWaypoints[0][0] ), yStart + ( yGap * g_vWaypoints[0][1] ) } );
-        m_pCarBlue->World()->SetCrosshair( xStart + ( xGap * g_vWaypoints[0][0] ), yStart + ( yGap * g_vWaypoints[0][1] ) );
-        m_pCarBlue->Steering()->SetPath( m_pPath->GetPath() );
-        m_pCarBlue->Steering()->ArriveOn();
-        break;
     }
 }
 
@@ -263,17 +229,17 @@ bool AIManager::CheckForCollisions( Vehicle* car )
     return false;
 }
 
-void AIManager::SpawnControlWindow()
+void AIManager::SpawnBehaviourWindow()
 {
-    if ( ImGui::Begin( "Behaviours", FALSE, ImGuiWindowFlags_AlwaysAutoResize ) )
+    if ( ImGui::Begin( "Behaviours", FALSE, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove ) )
     {
         // wander
-        static bool wanderBool = false;
+        static bool wanderBool = m_pCarBlue->Steering()->IsWanderOn();
         ImGui::Checkbox( "Wander", &wanderBool );
         wanderBool ? m_pCarBlue->Steering()->WanderOn() : m_pCarBlue->Steering()->WanderOff();
 
         // arrive
-        static bool arriveBool = false;
+        static bool arriveBool = m_pCarBlue->Steering()->IsArriveOn();
         ImGui::Checkbox( "Arrive", &arriveBool );
         arriveBool ? m_pCarBlue->Steering()->ArriveOn() : m_pCarBlue->Steering()->ArriveOff();
             
@@ -294,19 +260,97 @@ void AIManager::SpawnControlWindow()
         }
 
         // seek
-        static bool seekBool = false;
+        static bool seekBool = m_pCarBlue->Steering()->IsSeekOn();
         ImGui::Checkbox( "Seek", &seekBool );
         seekBool ? m_pCarBlue->Steering()->SeekOn() : m_pCarBlue->Steering()->SeekOff();
 
         // flee
-        static bool fleeBool = false;
+        static bool fleeBool = m_pCarBlue->Steering()->IsFleeOn();
         ImGui::Checkbox( "Flee", &fleeBool );
         fleeBool ? m_pCarBlue->Steering()->FleeOn() : m_pCarBlue->Steering()->FleeOff();
 
         // pursuit
-        static bool pursuitBool = false;
+        static bool pursuitBool = m_bEnableRedCar;
         ImGui::Checkbox( "Pursuit", &pursuitBool );
         m_bEnableRedCar = pursuitBool;
+
+        // path following
+        static bool pathFollowingBool = m_pCarBlue->Steering()->IsFollowPathOn();
+        ImGui::Checkbox( "Path Following", &pathFollowingBool );
+        pathFollowingBool ? m_pCarBlue->Steering()->FollowPathOn() : m_pCarBlue->Steering()->FollowPathOff();
+    }
+    ImGui::End();
+}
+
+void AIManager::SpawnObstacleWindow()
+{
+    if ( ImGui::Begin( "Obstacles", FALSE, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove ) )
+    {
+        if ( !m_bShowObstacles )
+            ImGui::SliderInt( "Amount", &m_iObstacleCount, 3, 10 );
+
+        if ( ImGui::Button( m_bShowObstacles ? "Clear Obstacles" : "Create Obstacles" ) )
+        {
+            if ( !m_bShowObstacles )
+            {
+                CreateObstacles();
+                m_bShowObstacles = true;
+                m_pCarBlue->Steering()->ObstacleAvoidanceOn();
+            }
+            else
+            {
+                m_obstacles.clear();
+                m_bShowObstacles = false;
+                m_pCarBlue->Steering()->ObstacleAvoidanceOff();
+            }
+        }
+    }
+    ImGui::End();
+}
+
+void AIManager::SpawnControlWindow()
+{
+    if ( ImGui::Begin( "Controls", FALSE, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove ) )
+    {
+        ImGui::Checkbox( "Paused", &m_bPaused );
+
+        static bool showWaypoints = m_waypoints[0]->IsVisible();
+        ImGui::Checkbox( "Show Waypoints", &showWaypoints );
+        m_waypoints[0]->SetVisible( showWaypoints );
+        
+        // car parameters
+        if ( ImGui::CollapsingHeader( "Car Controls" ) )
+        {
+            if ( m_pCarBlue->Steering()->IsFollowPathOn() )
+            {
+                if ( ImGui::Button( "Follow Track" ) )
+                {
+                    delete m_pPath;
+                    m_pPath = new Path();
+                    for ( uint32_t i = 0; i < g_vWaypoints.size(); i++ )
+                        m_pPath->AddWayPoint( { xStart + ( xGap * g_vWaypoints[i][0] ), yStart + ( yGap * g_vWaypoints[i][1] ) } );
+                    m_pCarBlue->Steering()->SetPath( m_pPath->GetPath() );
+                }
+                if ( ImGui::Button( "Return to Start" ) )
+                {
+                    delete m_pPath;
+                    m_pPath = new Path();
+                    m_pPath->AddWayPoint( { xStart + ( xGap * g_vWaypoints[0][0] ), yStart + ( yGap * g_vWaypoints[0][1] ) } );
+                    m_pCarBlue->World()->SetCrosshair( xStart + ( xGap * g_vWaypoints[0][0] ), yStart + ( yGap * g_vWaypoints[0][1] ) );
+                    m_pCarBlue->Steering()->SetPath( m_pPath->GetPath() );
+                }
+            }
+
+            static float carSpeed = m_pCarBlue->GetMaxSpeed();
+            ImGui::SliderFloat( "Max Speed", &carSpeed, 25.0f, 100.0f );
+            if ( !m_bItemPickedUp )
+                m_pCarBlue->SetMaxSpeed( carSpeed );
+
+            static float carForce = m_pCarBlue->GetMaxForce();
+            ImGui::SliderFloat( "Max Force", &carForce, 10.0f, 50.0f );
+            if ( !m_bItemPickedUp )
+                m_pCarBlue->SetMaxForce( carForce );
+        }
     }
     ImGui::End();
 }

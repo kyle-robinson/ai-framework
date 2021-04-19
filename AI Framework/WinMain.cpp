@@ -147,9 +147,6 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam 
         g_aiManager.SetCrosshair( xPos, yPos );
         break;
     }
-    case WM_KEYUP:
-        g_aiManager.HandleKeyPresses( wParam );
-        break;
     default:
         return DefWindowProc( hWnd, message, wParam, lParam );
     }

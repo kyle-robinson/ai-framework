@@ -1,8 +1,9 @@
 #include "PathFinder.h"
+#include "WinMain.h"
 
 PathFinder::PathFinder()
 {
-	//SetEdgeCosts();
+	SetEdgeCosts();
 }
 
 PathFinder::~PathFinder()
@@ -12,7 +13,7 @@ PathFinder::~PathFinder()
 	CLOSED_List.clear();
 }
 
-/*std::vector<Vector2D> PathFinder::GetPathBetween( Vector2D startPosition, Vector2D endPosition )
+std::vector<Vector2D> PathFinder::GetPathBetween( Vector2D startPosition, Vector2D endPosition )
 {
 	OPEN_List.clear();
 	CLOSED_List.clear();
@@ -51,8 +52,8 @@ PathFinder::~PathFinder()
 			}
 			double g = currentNode->cost;
 			double h = GetHeuristicCost(
-				Vector2D( currentNode->internalWaypoint->getPosition()->x, currentNode->internalWaypoint->getPosition()->y ),
-				Vector2D( nearestToEnd->getPosition()->x, nearestToEnd->getPosition()->y ) );
+				Vector2D( currentNode->internalWaypoint->GetPosition().x, currentNode->internalWaypoint->GetPosition().y ),
+				Vector2D( nearestToEnd->GetPosition().x, nearestToEnd->GetPosition().y ) );
 			double f = g + h;
 			AStarNode* connectedWaypoint = currentNode->parentWaypoint;
 			connectedWaypoint->cost = f;
@@ -72,13 +73,35 @@ PathFinder::~PathFinder()
 	return path;
 }
 
+vecWaypoints PathFinder::GetNeighbours( const int x, const int y )
+{
+	vecWaypoints neighbours;
+	vecWaypoints waypoints = aiManager.GetWaypoints();
+	int waypointIndex = y * WAYPOINT_RESOLUTION + x;
+
+	for ( int i = x - 1; i <= x + 1; i++ )
+	{
+		for ( int j = y - 1; j <= y + 1; j++ )
+		{
+			int neighbourIndex = j * WAYPOINT_RESOLUTION + i;
+			if ( waypointIndex != neighbourIndex )
+			{
+				if ( !waypoints[neighbourIndex] )
+					continue;
+				neighbours.push_back( waypoints[neighbourIndex] );
+			}
+		}
+	}
+
+	return neighbours;
+}
+
 void PathFinder::SetEdgeCosts()
 {
 	vecWaypoints waypoints = aiManager.GetWaypoints();
-
 	for ( uint32_t i = 0u; i < waypoints.size(); i++ )
 	{
-		vecWaypoints neighbours = aiManager.GetNeighbours( waypoints[i]->getPosition()->x, waypoints[i]->getPosition()->y );
+		vecWaypoints neighbours = GetNeighbours( waypoints[i]->GetPosition().x, waypoints[i]->GetPosition().y );
 		for ( uint32_t j = 0u; j < neighbours.size(); j++ )
 		{
 			Waypoint* waypointFrom = waypoints[i];
@@ -97,7 +120,7 @@ Waypoint* PathFinder::GetNearestWaypointToPosition( Vector2D position )
 
 	for ( uint32_t i = 0u; i < waypoints.size(); i++ )
 	{
-		Vector2D vecBetweenPoints = position - Vector2D( waypoints[i]->getPosition()->x, waypoints[i]->getPosition()->y );
+		Vector2D vecBetweenPoints = position - Vector2D( waypoints[i]->GetPosition().x, waypoints[i]->GetPosition().y );
 		double vecLength = vecBetweenPoints.Length();
 		if ( vecLength < nearestDist )
 		{
@@ -126,8 +149,8 @@ std::vector<Vector2D> PathFinder::ConstructPath( AStarNode* targetNode, Vector2D
 
 	while ( currentNode != NULL )
 	{
-		pathInReverse.push_back( Vector2D( currentNode->internalWaypoint->getPosition()->x,
-			currentNode->internalWaypoint->getPosition()->y ) );
+		pathInReverse.push_back( Vector2D( currentNode->internalWaypoint->GetPosition().x,
+			currentNode->internalWaypoint->GetPosition().y ) );
 		currentNode = currentNode->parentWaypoint;
 	}
 
@@ -150,4 +173,4 @@ double PathFinder::GetHeuristicCost( Vector2D pos1, Vector2D pos2 )
 {
 	Vector2D vecBetweenPoints = pos2 - pos1;
 	return vecBetweenPoints.Length();
-}*/
+}

@@ -24,6 +24,9 @@ public:
 	void SetPosition( Vector2D position ) noexcept { m_vPosition = position; }
 	Vector2D GetPosition() const noexcept { return m_vPosition; }
 
+	void SetScale( Vector2D scale ) noexcept { m_vScale = scale; }
+	Vector2D GetScale() const noexcept { return m_vScale; }
+
 	float GetBoundingRadius() const noexcept { return m_fBoundingRadius; }
 	void SetBoundingRadius( float boundingRadius ) noexcept { m_fBoundingRadius = boundingRadius; }
 
