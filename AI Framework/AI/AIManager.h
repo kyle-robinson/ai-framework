@@ -12,8 +12,6 @@
 #include "Obstacle.h"
 #include "Vehicle.h"
 
-#define WAYPOINT_RESOLUTION 20
-
 class PickupItem;
 class Waypoint;
 
@@ -60,15 +58,16 @@ public:
 protected:
 	bool CheckForCollisions( Vehicle* car );
 private:
-	void TogglePause() noexcept { m_paused = !m_paused; }
-	bool IsPaused() const noexcept { return m_paused; }
+	bool IsPaused() const noexcept { return m_bPaused; }
+	void TogglePause() noexcept { m_bPaused = !m_bPaused; }
 
 	HWND hWnd;
 	UINT width;
 	UINT height;
 
 	Vector2D m_crosshair;
-	bool m_paused = false;
+	bool m_bPaused = false;
+	bool m_bItemPickedUp = false;
 	bool m_bEnableRedCar = false;
 	bool m_bShowObstacles = false;
 

@@ -15,13 +15,28 @@ HRESULT AIManager::Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> d
     this->m_pDevice = device;
     
     // create pickups
-    PickupItem* pPickup = new PickupItem( 100, 200, 10 );
-    HRESULT hr = pPickup->InitMesh( device );
-    m_pickups.push_back( pPickup );
+    uint32_t index = 0;
+    float xGap = SCREEN_WIDTH / WAYPOINT_RESOLUTION;
+    float yGap = SCREEN_HEIGHT / WAYPOINT_RESOLUTION;
+    float xStart = -( SCREEN_WIDTH / 2 ) + ( xGap / 2 );
+    float yStart = -( SCREEN_HEIGHT / 2 ) + ( yGap / 2 );
+    for ( uint32_t i = 0; i < WAYPOINT_RESOLUTION; i++ )
+    {
+        for ( uint32_t j = 0; j < WAYPOINT_RESOLUTION; j++ )
+        {
+            PickupItem* pickup = new PickupItem( xStart + ( xGap * j ), yStart + ( yGap * i ), 10 );
+            if ( FAILED( pickup->InitMesh( device, index++ ) ) )
+            {
+                delete pickup;
+                continue;
+            }
+            m_pickups.push_back( std::move( pickup ) );
+        }
+    }
 
     // create vehicles
-    m_pCarBlue = new Vehicle( this, { 0, 0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1.0, 50, 150, 20 );
-    hr = m_pCarBlue->InitMesh( device.Get(), L"Resources\\Textures\\car_blue.dds" );
+    m_pCarBlue = new Vehicle( this, { 0, 0 }, RandFloat() * TwoPi, { 0.0, 0.0 }, 1, 50, 150, 20 );
+    HRESULT hr = m_pCarBlue->InitMesh( device.Get(), L"Resources\\Textures\\car_blue.dds" );
     m_pCarBlue->Steering()->WanderOn();
 
     m_pCarRed = new Vehicle( this, { 0, 0 }, RandFloat() * TwoPi, { 0, 0 }, 1, 50, 150, 20 );
@@ -117,7 +132,6 @@ void AIManager::Update( const float dt )
         if ( !IsPaused() )
         {
             m_pCarBlue->Update( dt );
-            CheckForCollisions( m_pCarBlue );
             if ( m_bEnableRedCar )
                 m_pCarRed->Update( dt );
         }
@@ -129,6 +143,25 @@ void AIManager::Update( const float dt )
         // pickups
         for ( uint32_t i = 0; i < m_pickups.size(); i++ )
             m_pickups[i]->Update( dt );
+
+        CheckForCollisions( m_pCarBlue );
+
+        static int pickupTimer;
+        if ( m_bItemPickedUp && pickupTimer > 0 )
+        {
+            m_pCarBlue->SetMaxSpeed( 250 );
+            m_pCarBlue->SetMaxForce( 150 );
+
+            pickupTimer--;
+        }
+        else
+        {
+            m_pCarBlue->SetMaxSpeed( 150 );
+            m_pCarBlue->SetMaxForce( 50 );
+
+            pickupTimer = 100;
+            m_bItemPickedUp = false;
+        }
     }
 
     // RENDER
@@ -214,22 +247,27 @@ bool AIManager::CheckForCollisions( Vehicle* car )
     XMStoreFloat3( &boundingSphereCar.Center, carPos );
     boundingSphereCar.Radius = scale.x;
 
-    // a pickup
-    XMVECTOR puPos;
-    XMVECTOR puScale;
-    XMMatrixDecompose( &puScale, &dummy, &puPos,
-        XMLoadFloat4x4( m_pickups[0]->GetTransform() )
-    );
-
-    XMStoreFloat3( &scale, puScale );
-    BoundingSphere boundingSpherePU;
-    XMStoreFloat3( &boundingSpherePU.Center, puPos );
-    boundingSpherePU.Radius = scale.x;
-
-    if ( boundingSphereCar.Intersects( boundingSpherePU ) )
+    for ( uint32_t i = 0; i < m_pickups.size(); i++ )
     {
-        OutputDebugStringA( "Collision!\n" );
-        return true;
+        // a pickup
+        XMVECTOR puPos;
+        XMVECTOR puScale;
+        XMMatrixDecompose( &puScale, &dummy, &puPos,
+            XMLoadFloat4x4( m_pickups[i]->GetTransform() )
+        );
+
+        XMStoreFloat3( &scale, puScale );
+        BoundingSphere boundingSpherePU;
+        XMStoreFloat3( &boundingSpherePU.Center, puPos );
+        boundingSpherePU.Radius = scale.x;
+
+        // collision occurred
+        if ( boundingSphereCar.Intersects( boundingSpherePU ) )
+        {
+            OutputDebugStringA( "Collision!\n" );
+            m_bItemPickedUp = true;
+            return true;
+        }
     }
 
     return false;
