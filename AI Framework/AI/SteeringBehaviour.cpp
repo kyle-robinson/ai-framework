@@ -2,13 +2,15 @@
 #include "Math/Transformations.h"
 #include "AIManager.h"
 
+#define ADD_TO_NET_FORCE if ( !AccumulateForce( m_vSteeringForce, netForce ) ) return m_vSteeringForce;
+
 SteeringBehaviour::SteeringBehaviour( Vehicle* vehicle ) : m_pVehicle( vehicle )
 {
-    double theta = RandFloat() * TwoPi;
+    // wander position lies on a circle
+    float theta = RandFloat() * TwoPi;
     m_vWanderTarget = Vector2D( m_fWanderRadius * cos( theta ), m_fWanderRadius * sin( theta ) );
 
     m_pPath = new Path();
-    m_pPath->LoopOn();
 }
 
 SteeringBehaviour::~SteeringBehaviour()
@@ -17,319 +19,227 @@ SteeringBehaviour::~SteeringBehaviour()
     m_pPath = nullptr;
 }
 
-Vector2D SteeringBehaviour::Calculate()
+Vector2D SteeringBehaviour::CalculateSteeringBehaviours()
 {
-    // reset the steering force
+    // reset steering force
     m_vSteeringForce.Zero();
-    Vector2D force;
+    Vector2D netForce;
 
-    if ( On( OBSTACLE ) )
-    {
-        force = ObstacleAvoidance( m_pVehicle->World()->GetObstacles() ) * m_fWeightObstacleAvoidance;
-        if ( !AccumulateForce( m_vSteeringForce, force ) ) return m_vSteeringForce;
-    }
-
-    if ( On( FLEE ) )
-    {
-        force = Flee( m_pVehicle->World()->GetRedCar()->GetPosition() ) * m_fWeightFlee;
-        if ( !AccumulateForce( m_vSteeringForce, force ) )
-            return m_vSteeringForce;
-    }
-
-    if ( On( SEEK ) )
-    {
-        force = Seek( m_pVehicle->World()->GetCrosshair() ) * m_fWeightSeek;
-        if ( !AccumulateForce( m_vSteeringForce, force ) )
-            return m_vSteeringForce;
-    }
-
+    // add to netForce for each steering behaviour
     if ( On( ARRIVE ) )
     {
-        force = Arrive( m_pVehicle->World()->GetCrosshair(), m_eDeceleration ) * m_fWeightArrive;
-        if ( !AccumulateForce( m_vSteeringForce, force ) )
-            return m_vSteeringForce;
+        netForce = Arrive( m_pVehicle->Manager()->GetCrosshair()->GetPosition() );
+        ADD_TO_NET_FORCE;
     }
-
+    if ( On( SEEK ) )
+    {
+        netForce = Seek( m_pVehicle->Manager()->GetCrosshair()->GetPosition() );
+        ADD_TO_NET_FORCE;
+    }
+    if ( On( FLEE ) )
+    {
+        netForce = Flee( m_bFleeCar ? m_pVehicle->Manager()->GetRedCar()->GetPosition()
+            : m_pVehicle->Manager()->GetCrosshair()->GetPosition() );
+        ADD_TO_NET_FORCE;
+    }
     if ( On( PURSUIT ) )
     {
         assert( m_pTargetAgent && "Pursuit target not assigned!" );
-        force = Pursuit( m_pTargetAgent ) * m_fWeightPursuit;
-        if ( !AccumulateForce( m_vSteeringForce, force ) )
-            return m_vSteeringForce;
+        netForce = Pursuit( m_pTargetAgent );
+        ADD_TO_NET_FORCE;
     }
-
+    if ( On( OBSTACLE ) )
+    {
+        netForce = ObstacleAvoidance( m_pVehicle->Manager()->GetObstacles() ) * 10.0f;
+        ADD_TO_NET_FORCE;
+    }
     if ( On( WANDER ) )
     {
-        force = Wander() * m_fWeightWander;
-        if ( !AccumulateForce( m_vSteeringForce, force ) )
-            return m_vSteeringForce;
+        netForce = Wander() * 10.0f;
+        ADD_TO_NET_FORCE;
     }
-
     if ( On( FOLLOW_PATH ) )
     {
-        force = FollowPath() * m_fWeightFollowPath;
-        if ( !AccumulateForce( m_vSteeringForce, force ) )
-            return m_vSteeringForce;
+        netForce = FollowPath() * 10.0f;
+        ADD_TO_NET_FORCE;
     }
 
+    // return total netForce on vehicle
     return m_vSteeringForce;
 }
 
-double SteeringBehaviour::ForwardComponent()
+bool SteeringBehaviour::AccumulateForce( Vector2D& netForce, Vector2D newForce )
 {
-    return m_pVehicle->GetHeading().Dot( m_vSteeringForce );
-}
+    // calculate how much force has been used, and how much remains to be used
+    float magSoFar = netForce.Length();
+    float magRemaining = m_pVehicle->GetMaxForce() - magSoFar;
+    if ( magRemaining <= 0.0f ) return false;
 
-double SteeringBehaviour::SideComponent()
-{
-    return m_pVehicle->GetSide().Dot( m_vSteeringForce );
-}
+    // calculate the magnitude of the force to add
+    float magToAdd = newForce.Length();
 
-bool SteeringBehaviour::AccumulateForce( Vector2D& RunningTot, Vector2D ForceToAdd )
-{
-    //calculate how much steering force the vehicle has used so far
-    double MagnitudeSoFar = RunningTot.Length();
-
-    //calculate how much steering force remains to be used by this vehicle
-    double MagnitudeRemaining = m_pVehicle->GetMaxForce() - MagnitudeSoFar;
-
-    //return false if there is no more force left to use
-    if ( MagnitudeRemaining <= 0.0 ) return false;
-
-    //calculate the magnitude of the force we want to add
-    double MagnitudeToAdd = ForceToAdd.Length();
-
-    //if the magnitude of the sum of ForceToAdd and the running total
-    //does not exceed the maximum force available to this vehicle, just
-    //add together. Otherwise add as much of the ForceToAdd vector is
-    //possible without going over the max.
-    if ( MagnitudeToAdd < MagnitudeRemaining )
-    {
-        RunningTot += ForceToAdd;
-    }
+    // if mag of force to add and total don't exceed vehicle's max force, add together
+    if ( magToAdd < magRemaining )
+        netForce += newForce;
+    // else an amount of force that doesn't exceed the vehicle's max force
     else
-    {
-        //add it to the steering force
-        RunningTot += ( Vec2DNormalize( ForceToAdd ) * MagnitudeRemaining );
-    }
+        netForce += ( Vec2DNormalize( newForce ) * magRemaining );
 
     return true;
 }
 
-Vector2D SteeringBehaviour::Arrive( Vector2D TargetPos, Deceleration deceleration )
+#pragma region BEHAVIOURS
+Vector2D SteeringBehaviour::Arrive( Vector2D target )
 {
-    Vector2D ToTarget = TargetPos - m_pVehicle->GetPosition();
+    Vector2D toTarget = target - m_pVehicle->GetPosition();
+    float dist = toTarget.Length();
 
-    //calculate the distance to the target
-    double dist = ToTarget.Length();
-
-    if ( dist > 0 )
+    if ( dist > 0.0f )
     {
-        //because Deceleration is enumerated as an int, this value is required
-        //to provide fine tweaking of the deceleration..
-        const double DecelerationTweaker = 1.0;
+        // calculate the speed required to reach the target given the desired deceleration
+        float speed = dist / 2.0f;
 
-        //calculate the speed required to reach the target given the desired
-        //deceleration
-        double speed = dist / ( ( double )deceleration * DecelerationTweaker );
-
-        //make sure the velocity does not exceed the max
+        // ensure speed doesn't exceed max
         speed = min( speed, m_pVehicle->GetMaxSpeed() );
 
-        //from here proceed just like Seek except we don't need to normalize 
-        //the ToTarget vector because we have already gone to the trouble
-        //of calculating its length: dist. 
-        Vector2D DesiredVelocity = ToTarget * speed / dist;
-
-        return ( DesiredVelocity - m_pVehicle->GetVelocity() );
+        // continue like with 'seek' but don't normalise
+        Vector2D newVel = toTarget * speed / dist;
+        return ( newVel - m_pVehicle->GetVelocity() );
     }
 
     return Vector2D( 0, 0 );
 }
 
-Vector2D SteeringBehaviour::Flee( Vector2D TargetPos )
+Vector2D SteeringBehaviour::Flee( Vector2D target )
 {
-    const double PanicDistanceSq = powf( 200.0f, 2.0f );
-    if ( Vec2DDistanceSq( m_pVehicle->GetPosition(), m_pVehicle->World()->GetRedCar()->GetPosition() ) > PanicDistanceSq )
-        return Vector2D( 0, 0 );
-
-    Vector2D DesiredVelocity = Vec2DNormalize( m_pVehicle->GetPosition() - TargetPos ) * m_pVehicle->GetMaxSpeed();
-    return ( DesiredVelocity - m_pVehicle->GetVelocity() );
-}
-
-Vector2D SteeringBehaviour::Seek( Vector2D TargetPos )
-{
-    Vector2D DesiredVelocity = Vec2DNormalize( TargetPos - m_pVehicle->GetPosition() )
-        * m_pVehicle->GetMaxSpeed();
-
-    return ( DesiredVelocity - m_pVehicle->GetVelocity() );
-}
-
-Vector2D SteeringBehaviour::Pursuit( const Vehicle* evader )
-{
-    //if the evader is ahead and facing the agent then we can just seek
-    //for the evader's current position.
-    Vector2D ToEvader = evader->GetPosition() - m_pVehicle->GetPosition();
-
-    double RelativeHeading = m_pVehicle->GetHeading().Dot( evader->GetHeading() );
-
-    if ( ( ToEvader.Dot( m_pVehicle->GetHeading() ) > 0 ) &&
-        ( RelativeHeading < -0.95 ) )  //acos(0.95)=18 degs
+    // flee only if within range of target
+    if ( m_bEnablePanic )
     {
-        return Seek( evader->GetPosition() );
+        const float fleeDistSq = powf( 200.0f, 2.0f );
+        if ( Vec2DDistanceSq( m_pVehicle->GetPosition(), target ) > fleeDistSq )
+            return Vector2D( 0, 0 );
     }
 
-    //Not considered ahead so we predict where the evader will be.
+    m_pVehicle->SetMaxSpeed( m_pVehicle->GetMaxSpeed() * 2.0f );
+    Vector2D newVel = Vec2DNormalize( m_pVehicle->GetPosition() - target ) * m_pVehicle->GetMaxSpeed();
+    return ( newVel - m_pVehicle->GetVelocity() );
+}
 
-    //the lookahead time is propotional to the distance between the evader
-    //and the pursuer; and is inversely proportional to the sum of the
-    //agent's velocities
-    double LookAheadTime = ToEvader.Length() /
-        ( m_pVehicle->GetMaxSpeed() + evader->GetSpeed() );
+Vector2D SteeringBehaviour::Seek( Vector2D target )
+{
+    Vector2D newVel = Vec2DNormalize( target - m_pVehicle->GetPosition() ) * m_pVehicle->GetMaxSpeed();
+    return ( newVel - m_pVehicle->GetVelocity() );
+}
 
-    //now seek to the predicted future position of the evader
-    return Seek( evader->GetPosition() + evader->GetVelocity() * LookAheadTime );
+Vector2D SteeringBehaviour::Pursuit( const Vehicle* agent )
+{
+    // if agent is ahead and facing target, seek for evader
+    Vector2D toAgent = agent->GetPosition() - m_pVehicle->GetPosition();
+    float heading = m_pVehicle->GetHeading().Dot( agent->GetHeading() );
+    if ( ( toAgent.Dot( m_pVehicle->GetHeading() ) > 0.0f ) && ( heading < -0.95f ) )
+        return Seek( agent->GetPosition() );
+
+    // get dist between agent and pursuer / inverse sum of both velocities
+    float lookAheadTime = toAgent.Length() / ( m_pVehicle->GetMaxSpeed() + agent->GetSpeed() );
+
+    // seek to the predicted position of evader
+    return Seek( agent->GetPosition() + agent->GetVelocity() * lookAheadTime );
 }
 
 Vector2D SteeringBehaviour::Wander()
 {
-    //this behavior is dependent on the update rate, so this line must
-    //be included when using time independent framerate.
-    double JitterThisTimeSlice = m_fWanderJitter * m_pVehicle->GetDeltaTime();
+    // time independent update rate
+    float jitterIndependent = m_fWanderJitter * m_pVehicle->GetDeltaTime();
 
-    //first, add a small random vector to the target's position
-    m_vWanderTarget += Vector2D( RandomClamped() * JitterThisTimeSlice,
-        RandomClamped() * JitterThisTimeSlice );
-
-    //reproject this new vector back on to a unit circle
+    // add a small random vector to the target's position
+    m_vWanderTarget += Vector2D( RandomClamped() * jitterIndependent, RandomClamped() * jitterIndependent );
     m_vWanderTarget.Normalize();
 
-    //increase the length of the vector to the same as the radius
-    //of the wander circle
+    // increase vector length to same as radius of wander circle
     m_vWanderTarget *= m_fWanderRadius;
 
-    //move the target into a position WanderDist in front of the agent
-    Vector2D target = m_vWanderTarget + Vector2D( m_fWanderDistance, 0 );
+    // move target to a position in front of vehicle
+    Vector2D targetPos = m_vWanderTarget + Vector2D( m_fWanderDistance, 0 );
 
-    //project the target into world space
-    Vector2D Target = PointToWorldSpace( target,
-        m_pVehicle->GetHeading(),
-        m_pVehicle->GetSide(),
-        m_pVehicle->GetPosition() );
-
-    //and steer towards it
-    return Target - m_pVehicle->GetPosition();
+    // convert target to world space
+    Vector2D targetWorld = PointToWorldSpace( targetPos, m_pVehicle->GetHeading(), m_pVehicle->GetSide(), m_pVehicle->GetPosition() );
+    return targetWorld - m_pVehicle->GetPosition();
 }
 
 Vector2D SteeringBehaviour::ObstacleAvoidance( const std::vector<DrawableGameObject*>& obstacles )
 {
-    //the detection box length is proportional to the agent's velocity
+    // detection box length is proportional to the car's velocity
     m_fDBoxLength = 40.0f + ( m_pVehicle->GetSpeed() / m_pVehicle->GetMaxSpeed() ) * 40.0f;
 
-    //tag all obstacles within range of the box for processing
-    m_pVehicle->World()->TagObstaclesWithinViewRange( m_pVehicle, m_fDBoxLength );
+    // tag obstacles within range for processing
+    m_pVehicle->Manager()->TagObstaclesWithinViewRange( m_pVehicle, m_fDBoxLength );
 
-    //this will keep track of the closest intersecting obstacle (CIB)
-    DrawableGameObject* ClosestIntersectingObstacle = NULL;
+    // closest obstacle
+    DrawableGameObject* closestObstacle = nullptr;
+    float distToClosest = MaxFloat;
+    Vector2D closestObstaclePosition;
 
-    //this will be used to track the distance to the CIB
-    double DistToClosestIP = MaxDouble;
-
-    //this will record the transformed local coordinates of the CIB
-    Vector2D LocalPosOfClosestObstacle;
-
-    std::vector<DrawableGameObject*>::const_iterator curOb = obstacles.begin();
-
-    while ( curOb != obstacles.end() )
+    std::vector<DrawableGameObject*>::const_iterator currentObstacle = obstacles.begin();
+    while ( currentObstacle != obstacles.end() )
     {
-        //if the obstacle has been tagged within range proceed
-        if ( ( *curOb )->IsTagged() )
+        // if the obstacle is within range
+        if ( ( *currentObstacle )->IsTagged() )
         {
-            //calculate this obstacle's position in local space
-            Vector2D LocalPos = PointToLocalSpace( ( *curOb )->GetPosition(),
-                m_pVehicle->GetHeading(),
-                m_pVehicle->GetSide(),
-                m_pVehicle->GetPosition() );
+            // calculate obstacle's local space position
+            Vector2D localPosition = PointToLocalSpace( ( *currentObstacle )->GetPosition(), m_pVehicle->GetHeading(),
+                m_pVehicle->GetSide(), m_pVehicle->GetPosition() );
 
-            //if the local position has a negative x value then it must lay
-            //behind the agent. (in which case it can be ignored)
-            if ( LocalPos.x >= 0 )
+            // if behind the car, ignore it
+            if ( localPosition.x >= 0.0f )
             {
-                //if the distance from the x axis to the object's position is less
-                //than its radius + half the width of the detection box then there
-                //is a potential intersection.
-                double ExpandedRadius = ( *curOb )->GetBoundingRadius() + m_pVehicle->GetBoundingRadius();
-
-                if ( fabs( LocalPos.y ) < ExpandedRadius )
+                // check for potential intersection
+                float radius = ( *currentObstacle )->GetBoundingRadius() + m_pVehicle->GetBoundingRadius();
+                if ( fabs( localPosition.y ) < radius )
                 {
-                    //now to do a line/circle intersection test. The center of the 
-                    //circle is represented by (cX, cY). The intersection points are 
-                    //given by the formula x = cX +/-sqrt(r^2-cY^2) for y=0. 
-                    //We only need to look at the smallest positive value of x because
-                    //that will be the closest point of intersection.
-                    double cX = LocalPos.x;
-                    double cY = LocalPos.y;
+                    // line intersection test
+                    float SqrtPart = sqrt( powf( radius, 2.0f ) - powf( localPosition.y, 2.0f ) );
+                    float intersectionPosition = localPosition.x - SqrtPart;
+                    if ( intersectionPosition <= 0.0f )
+                        intersectionPosition = localPosition.x + SqrtPart;
 
-                    //we only need to calculate the sqrt part of the above equation once
-                    double SqrtPart = sqrt( ExpandedRadius * ExpandedRadius - cY * cY );
-
-                    double ip = cX - SqrtPart;
-
-                    if ( ip <= 0.0 )
+                    // check to see if this obstacle is the closest
+                    if ( intersectionPosition < distToClosest )
                     {
-                        ip = cX + SqrtPart;
-                    }
-
-                    //test to see if this is the closest so far. If it is keep a
-                    //record of the obstacle and its local coordinates
-                    if ( ip < DistToClosestIP )
-                    {
-                        DistToClosestIP = ip;
-
-                        ClosestIntersectingObstacle = *curOb;
-
-                        LocalPosOfClosestObstacle = LocalPos;
+                        distToClosest = intersectionPosition;
+                        closestObstacle = *currentObstacle;
+                        closestObstaclePosition = localPosition;
                     }
                 }
             }
         }
-
-        ++curOb;
+        ++currentObstacle;
     }
 
-    //if we have found an intersecting obstacle, calculate a steering 
-    //force away from it
-    Vector2D SteeringForce;
-
-    if ( ClosestIntersectingObstacle )
+    // if there is an intersecting obstacle, get a steering force away from it
+    Vector2D netForce;
+    if ( closestObstacle )
     {
-        //the closer the agent is to an object, the stronger the 
-        //steering force should be
-        float multiplier = 1.0f + ( m_fDBoxLength - LocalPosOfClosestObstacle.x ) / m_fDBoxLength;
+        // the closer the obstacle, the stronger the steering force
+        float multiplier = 1.0f + ( m_fDBoxLength - closestObstaclePosition.x ) / m_fDBoxLength;
+        netForce.y = ( closestObstacle->GetBoundingRadius() - closestObstaclePosition.y ) * multiplier;
 
-        //calculate the lateral force
-        SteeringForce.y = ( ClosestIntersectingObstacle->GetBoundingRadius() -
-            LocalPosOfClosestObstacle.y ) * multiplier;
-
-        //apply a braking force proportional to the obstacles distance from
-        //the vehicle. 
+        // apply braking force proportional to obstacles distance from car
         const float BrakingWeight = 0.2f;
-        SteeringForce.x = ( ClosestIntersectingObstacle->GetBoundingRadius() -
-            LocalPosOfClosestObstacle.x ) * BrakingWeight;
+        netForce.x = ( closestObstacle->GetBoundingRadius() - closestObstaclePosition.x ) * BrakingWeight;
     }
 
-    //finally, convert the steering vector from local to world space
-    return VectorToWorldSpace( SteeringForce, m_pVehicle->GetHeading(), m_pVehicle->GetSide() );
+    return VectorToWorldSpace( netForce, m_pVehicle->GetHeading(), m_pVehicle->GetSide() );
 }
 
 Vector2D SteeringBehaviour::FollowPath()
 {
-    //move to next target if close enough to current target (working in distance squared space)
+    // if the car is close enough to the current target, then move to the next target
     if ( Vec2DDistanceSq( m_pPath->CurrentWaypoint(), m_pVehicle->GetPosition() ) < m_fWaypointSeekDistSq )
         m_pPath->SetNextWaypoint();
 
     if ( !m_pPath->Finished() )
         return Seek( m_pPath->CurrentWaypoint() );
     else
-        return Arrive( m_pPath->CurrentWaypoint(), NORMAL );
+        return Arrive( m_pPath->CurrentWaypoint() );
 }
+#pragma endregion

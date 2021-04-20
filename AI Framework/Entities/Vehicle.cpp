@@ -23,7 +23,7 @@ Vehicle::Vehicle(
 		maxTurnRate,
 		maxForce
 	),
-	m_pWorld( aiManager )
+	m_pManager( aiManager )
 {
 	m_pSteering = new SteeringBehaviour( this );
 }
@@ -42,7 +42,7 @@ void Vehicle::Update( const float dt )
 
 	// calculate net force
 	Vector2D steeringForce;
-	steeringForce = m_pSteering->Calculate();
+	steeringForce = m_pSteering->CalculateSteeringBehaviours();
 
 	// a = f / m
 	Vector2D acceleration = steeringForce / m_fMass;
@@ -53,7 +53,7 @@ void Vehicle::Update( const float dt )
 	m_vPosition += m_vVelocity * dt;
 
 	// update the heading if the vehicle has a non zero velocity
-	if ( m_vVelocity.LengthSq() > 0.00000001 )
+	if ( m_vVelocity.LengthSq() > 0.00000001f )
 	{
 		m_vHeading = Vec2DNormalize( m_vVelocity );
 		m_vSide = m_vHeading.Perp();
@@ -61,15 +61,12 @@ void Vehicle::Update( const float dt )
 
 	// handle vehicle screen wrapping
 	RECT rect;
-	GetClientRect( m_pWorld->GetHWND(), &rect );
-	int cxClient = rect.right;
-	int cyClient = rect.bottom;
-	WrapAround( m_vPosition, cxClient / 2, cyClient / 2 );
+	GetClientRect( m_pManager->GetHWND(), &rect );
+	WrapAround( m_vPosition, rect.right / 2, rect.bottom / 2 );
 
 	// update the vehicle's rotation
 	Vector2D diff;
-	diff.x = m_vPosition.x - currentPos.x;
-	diff.y = m_vPosition.y - currentPos.y;
+	diff = m_vPosition - currentPos;
 	if ( diff.Length() > 0.0f )
 	{
 		diff.Normalize();

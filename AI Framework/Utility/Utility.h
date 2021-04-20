@@ -93,10 +93,9 @@ inline double RandInRange( double x, double y )
 }
 
 // returns a random bool
-inline bool   RandBool()
+inline bool RandBool()
 {
 	if ( RandFloat() > 0.5 ) return true;
-
 	else return false;
 }
 

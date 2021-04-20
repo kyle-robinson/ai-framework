@@ -9,6 +9,7 @@
 #include <directxcolors.h>
 #include <DirectXCollision.h>
 #include "EntityTemplates.h"
+#include "Crosshair.h"
 #include "Obstacle.h"
 #include "Vehicle.h"
 #include "Path.h"
@@ -25,26 +26,14 @@ typedef std::vector<PickupItem*> vecPickups;
 class AIManager
 {
 public:
+	~AIManager();
 	HRESULT Initialise( HWND hWnd, Microsoft::WRL::ComPtr<ID3D11Device> pDevice, UINT width, UINT height );
 	void Update( const float dt );
 	void CreateObstacles();
-	
-	// crosshair
-	Vector2D GetCrosshair() const noexcept { return m_crosshair; }
-	void SetCrosshair( const float x, const float y ) noexcept
-	{
-		Vector2D posToMoveTo( x, y );
-		for ( vecDrawables::iterator curOb = m_obstacles.begin(); curOb != m_obstacles.end(); ++curOb )
-		{
-			// prevent moving to a space occupied by an obstacle
-			if ( PointInCircle( ( *curOb )->GetPosition(), ( *curOb )->GetBoundingRadius(), posToMoveTo ) )
-				return;
-		}
-		m_crosshair = { x, y };
-	}
 
 	// objects
 	vecWaypoints GetWaypoints() const noexcept { return m_waypoints; }
+	Crosshair* GetCrosshair() const noexcept { return m_pCrosshair; }
 	vecDrawables GetObstacles() noexcept { return m_obstacles; }
 	Vehicle* GetRedCar() const noexcept { return m_pCarRed; }
 
@@ -57,6 +46,9 @@ public:
 protected:
 	bool CheckForCollisions( Vehicle* car );
 private:
+	void CreateWaypoints();
+	void CreatePickups();
+
 	void SpawnBehaviourWindow();
 	void SpawnObstacleWindow();
 	void SpawnControlWindow();
@@ -65,7 +57,6 @@ private:
 	UINT width;
 	UINT height;
 
-	Vector2D m_crosshair;
 	bool m_bPaused = false;
 	int m_iObstacleCount = 7;
 	bool m_bItemPickedUp = false;
@@ -76,6 +67,7 @@ private:
 	Vehicle* m_pCarRed;
 	Vehicle* m_pCarBlue;
 	vecPickups m_pickups;
+	Crosshair* m_pCrosshair;
 	vecWaypoints m_waypoints;
 	vecDrawables m_obstacles;
 	std::vector<Vector2D> path;

@@ -79,7 +79,7 @@ HRESULT InitWindow( HINSTANCE hInstance, int nCmdShow )
     wcex.cbWndExtra = 0;
     wcex.hInstance = hInstance;
     wcex.hIcon = LoadIcon( hInstance, ( LPCTSTR )IDI_TUTORIAL1 );
-    wcex.hCursor = LoadCursor( nullptr, IDC_ARROW );
+    wcex.hCursor = LoadCursor( hInstance, ( LPCWSTR )IDI_CURSOR1 );
     wcex.hbrBackground = ( HBRUSH )( COLOR_WINDOW + 1 );
     wcex.lpszMenuName = nullptr;
     wcex.lpszClassName = L"TutorialWindowClass";
@@ -144,7 +144,8 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam 
         xPos -= SCREEN_WIDTH / 2;
         yPos -= SCREEN_HEIGHT / 2;
         yPos *= -1;
-        g_aiManager.SetCrosshair( xPos, yPos );
+        g_aiManager.GetCrosshair()->SetPosition(
+            { static_cast<float>( xPos ), static_cast<float>( yPos ) } );
         break;
     }
     default:

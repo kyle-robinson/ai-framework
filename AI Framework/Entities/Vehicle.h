@@ -24,11 +24,11 @@ public:
 	void Update( const float dt ) override;
 	float GetDeltaTime() const noexcept { return m_fTimeElapsed; }
 
-	AIManager* const World() const noexcept { return m_pWorld; }
+	AIManager* const Manager() const noexcept { return m_pManager; }
 	SteeringBehaviour* const Steering() const noexcept { return m_pSteering; }
 private:
 	float m_fTimeElapsed;
-	AIManager* m_pWorld;
+	AIManager* m_pManager;
 	SteeringBehaviour* m_pSteering;
 };
 
