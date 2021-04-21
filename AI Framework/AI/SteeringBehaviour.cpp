@@ -26,6 +26,11 @@ Vector2D SteeringBehaviour::CalculateSteeringBehaviours()
     Vector2D netForce;
 
     // add to netForce for each steering behaviour that is active
+    if ( On( OBSTACLE ) )
+    {
+        netForce = ObstacleAvoidance( m_pVehicle->Manager()->GetObstacles() ) * 10.0f;
+        ADD_TO_NET_FORCE;
+    }
     if ( On( ARRIVE ) )
     {
         netForce = Arrive( m_pVehicle->Manager()->GetCrosshair()->GetPosition() );
@@ -46,11 +51,6 @@ Vector2D SteeringBehaviour::CalculateSteeringBehaviours()
     {
         assert( m_pTargetAgent && "Pursuit target not assigned!" );
         netForce = Pursuit( m_pTargetAgent );
-        ADD_TO_NET_FORCE;
-    }
-    if ( On( OBSTACLE ) )
-    {
-        netForce = ObstacleAvoidance( m_pVehicle->Manager()->GetObstacles() ) * 10.0f;
         ADD_TO_NET_FORCE;
     }
     if ( On( WANDER ) )

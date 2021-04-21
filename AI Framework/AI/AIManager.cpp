@@ -136,7 +136,7 @@ void AIManager::CreateObstacles()
             int cyClient = rect.bottom;
 
             // randomly place obstacles
-            const int radius = 50;
+            const int radius = 40;
             const int border = 10;
             Obstacle* obstacle = new Obstacle(
                 RandInt( ( -cxClient / 2 ) + radius + border, ( cxClient / 2 ) - radius - border ),
