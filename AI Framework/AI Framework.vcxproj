@@ -115,6 +115,9 @@
   <ItemGroup>
     <ResourceCompile Include="AI Framework.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>AI Framework</ProjectName>
     <ProjectGuid>{EA744FDE-6588-4AA7-94BA-318D00E409DC}</ProjectGuid>

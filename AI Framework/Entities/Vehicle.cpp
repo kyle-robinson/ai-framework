@@ -41,8 +41,7 @@ void Vehicle::Update( const float dt )
 	Vector2D currentPos = GetPosition();
 
 	// calculate net force
-	Vector2D steeringForce;
-	steeringForce = m_pSteering->CalculateSteeringBehaviours();
+	Vector2D steeringForce = m_pSteering->CalculateSteeringBehaviours();
 
 	// a = f / m
 	Vector2D acceleration = steeringForce / m_fMass;
@@ -65,8 +64,7 @@ void Vehicle::Update( const float dt )
 	WrapAround( m_vPosition, rect.right / 2, rect.bottom / 2 );
 
 	// update the vehicle's rotation
-	Vector2D diff;
-	diff = m_vPosition - currentPos;
+	Vector2D diff = m_vPosition - currentPos;
 	if ( diff.Length() > 0.0f )
 	{
 		diff.Normalize();

@@ -294,4 +294,9 @@
       <Filter>Resources</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd">
+      <Filter>Resources</Filter>
+    </None>
+  </ItemGroup>
 </Project>

@@ -25,7 +25,7 @@ Vector2D SteeringBehaviour::CalculateSteeringBehaviours()
     m_vSteeringForce.Zero();
     Vector2D netForce;
 
-    // add to netForce for each steering behaviour
+    // add to netForce for each steering behaviour that is active
     if ( On( ARRIVE ) )
     {
         netForce = Arrive( m_pVehicle->Manager()->GetCrosshair()->GetPosition() );
@@ -224,8 +224,8 @@ Vector2D SteeringBehaviour::ObstacleAvoidance( const std::vector<DrawableGameObj
         netForce.y = ( closestObstacle->GetBoundingRadius() - closestObstaclePosition.y ) * multiplier;
 
         // apply braking force proportional to obstacles distance from car
-        const float BrakingWeight = 0.2f;
-        netForce.x = ( closestObstacle->GetBoundingRadius() - closestObstaclePosition.x ) * BrakingWeight;
+        const float brakingForce = 0.2f;
+        netForce.x = ( closestObstacle->GetBoundingRadius() - closestObstaclePosition.x ) * brakingForce;
     }
 
     return VectorToWorldSpace( netForce, m_pVehicle->GetHeading(), m_pVehicle->GetSide() );
