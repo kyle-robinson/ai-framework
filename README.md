@@ -1,9 +1,9 @@
-# ai-framework
+# A.I. Behaviours
 A demonstration of a variety of autonomous steering behaviours.
 
 *- Click image for more information on website -*
 <a href="https://kyle-robinson.github.io/html/ai-behaviours" target="_blank">
-        <img src="https://i.imgur.com/mgL90O0.jpg" alt="AI Framework Thumbnail" border="10" />
+        <img src="https://i.imgur.com/L047Lqg.jpeg" alt="AI Framework Thumbnail" border="10" />
 </a>
 
 ## Steering Behaviours
