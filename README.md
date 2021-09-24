@@ -35,6 +35,6 @@ https://user-images.githubusercontent.com/39779606/134725483-72547497-743f-4c04-
 
 ### Credits
 
-        Source Code:
+        Research:
                     https://www.red3d.com/cwr/steer/gdc99/
                     https://www.gamedeveloper.com/design/introduction-to-steering-behaviours
