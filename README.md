@@ -35,7 +35,7 @@ A demonstration of a variety of autonomous steering behaviours.
 </details>
 
 
-- <details>
+<details>
   <summary>Obstacle Avoidance</summary>
   <video src="https://user-images.githubusercontent.com/39779606/134725452-68a928d0-2575-4a26-a3c6-df28dd9a4a9c.mp4" data-canonical-src="https://user-images.githubusercontent.com/39779606/134725243-442f4f1e-55f4-45a3-9d5e-fa7ecf7df8a5.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2 width-fit" style="max-height:640px;">
   </video>
