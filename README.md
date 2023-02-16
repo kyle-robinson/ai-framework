@@ -69,7 +69,7 @@ A demonstration of a variety of autonomous steering behaviours.
   </video>
 </details>
 
-
+---
 
 ### Credits
 
