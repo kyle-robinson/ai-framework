@@ -10,7 +10,7 @@
 
 A demonstration of a variety of autonomous steering behaviours.
 
-*- Click <a href="https://kyle-robinson.github.io/html/ai-behaviours" target="_blank">here</a> for more information on website -*<br/>
+*- Click <a href="https://kyle-robinson.github.io/html/ai-behaviours" target="_blank">here</a> to view project on website -*<br/>
 
 <img src="https://i.imgur.com/L047Lqg.jpeg" alt="AI Framework Thumbnail" border="10" width="60%" />
 
